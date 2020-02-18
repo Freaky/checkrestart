@@ -6,9 +6,28 @@ Check for processes that may require restarting.
 
 ```shell
 -# checkrestart
-44960            weechat        [MISSING LIB]   /usr/local/bin/weechat
-81345               tmux        [MISSING EXE]   tmux: server (/tmp/tmux-1001/default)
-80307               tmux        [MISSING EXE]   tmux: client (/tmp/tmux-1001/default)
+  PID               COMM         MISSING        ARGS
+03945              httpd         Library        /usr/local/sbin/httpd
+03572              httpd         Library        /usr/local/sbin/httpd
+03299              httpd         Library        /usr/local/sbin/httpd
+31388              httpd         Library        /usr/local/sbin/httpd
+91629              httpd         Library        /usr/local/sbin/httpd
+68718              httpd         Library        /usr/local/sbin/httpd
+32008              httpd         Library        /usr/local/sbin/httpd
+31647              httpd         Library        /usr/local/sbin/httpd
+50138              httpd         Library        /usr/local/sbin/httpd
+59709              httpd         Library        /usr/local/sbin/httpd
+02641              httpd         Library        /usr/local/sbin/httpd
+70820              httpd         Library        /usr/local/sbin/httpd
+33494              named          Binary        /usr/local/sbin/named
+44960            weechat         Library        /usr/local/bin/weechat
+81345               tmux          Binary        tmux: server (/tmp/tmux-1001/default)
+80307               tmux          Binary        tmux: client (/tmp/tmux-1001/default)
+59517        mosh-server          Binary        mosh-server
+77424          freshclam          Binary        /usr/local/bin/freshclam
+73780              clamd          Binary        /usr/local/sbin/clamd
+21134          memcached         Library        /usr/local/bin/memcached
+22601            vnstatd          Binary        /usr/local/sbin/vnstatd
 ```
 
 ## How it works
