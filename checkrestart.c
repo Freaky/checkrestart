@@ -31,7 +31,8 @@ getargs(pid_t pid, char *args, size_t maxlen) {
 	return getprocstr(pid, KERN_PROC_ARGS, args, maxlen);
 }
 
-int main(void) {
+int
+main(void) {
 	struct procstat *prstat = procstat_open_sysctl();
 	if (prstat == NULL) errx(1, "procstat_open()");
 
@@ -87,4 +88,5 @@ int main(void) {
 
 	procstat_freeprocs(prstat, p);
 	procstat_close(prstat);
+	return 0;
 }
