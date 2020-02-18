@@ -48,11 +48,11 @@ for full functionality.
 .Sh EXAMPLES
 .Bd -literal -offset indent
  # checkrestart
-  JID   PID          COMMAND UPDATED ARGS 
-    0 44960          weechat Library /usr/local/bin/weechat
-    0 81345             tmux  Binary tmux: server (/tmp/tmux-1001/default)
-    0 80307             tmux  Binary tmux: client (/tmp/tmux-1001/default)
-    1 18115        memcached  Binary /usr/local/bin/memcached
+  PID   JID         COMMAND UPDATED ARGS 
+44960     0         weechat Library /usr/local/bin/weechat
+81345     0            tmux  Binary tmux: server (/tmp/tmux-1001/default)
+80307     0            tmux  Binary tmux: client (/tmp/tmux-1001/default)
+18115     1       memcached  Binary /usr/local/bin/memcached
 .Ed
 .Pp
 This output indicates
