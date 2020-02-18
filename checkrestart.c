@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int needheader = 1;
+
 static int
 getprocstr(pid_t pid, int node, char *str, size_t maxlen) {
 	size_t len = maxlen;
@@ -31,58 +33,51 @@ getargs(pid_t pid, char *args, size_t maxlen) {
 	return getprocstr(pid, KERN_PROC_ARGS, args, maxlen);
 }
 
+static void
+needsrestart(const struct kinfo_proc *proc, const char *why, const char *note) {
+	if (needheader) {
+		needheader = 0;
+		printf("%5s\t%16s\t%8s\t%s\n", "PID", "COMM", "MISSING", "ARGS");
+	}
+	printf("%05d\t%16s\t%8s\t%s\n", proc->ki_pid, proc->ki_comm, why, note);
+}
+
 int
 main(void) {
 	struct procstat *prstat = procstat_open_sysctl();
 	if (prstat == NULL) errx(1, "procstat_open()");
 
-	// List all procs
 	unsigned int cnt;
 	struct kinfo_proc *p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 	if (p == NULL) errx(1, "procstat_getprocs()");
 
-	// For each proc
 	for (unsigned int i = 0; i < cnt; i++) {
 		char pathname[PATH_MAX];
 		struct kinfo_proc *proc = &p[i];
 
-		// Skip kernel procs
 		if (proc->ki_ppid == 0) continue;
 
-		// Get its executable path, no such file or directory means it's missing
-		// ... could also mean the process doesn't exist :/
 		int error = getpathname(proc->ki_pid, pathname, sizeof(pathname));
 		if (error != 0 && error != ENOENT) continue;
 		if (error == ENOENT) {
-			// Try to find the path from the argument list
 			char args[PATH_MAX];
-			(void)getargs(proc->ki_pid, args, sizeof(args)); // strictly best effort
-			// missing executable, immediate restart candidate
-			// search plists for files with the name of this executable as potential candidates
-			printf("%05d\t%16s\t[MISSING EXE]\t%s\n", proc->ki_pid, proc->ki_comm, args);
+			(void)getargs(proc->ki_pid, args, sizeof(args));
+			needsrestart(proc, "Binary", args);
 		} else {
-			// get vm map, find executable vn mappings with no associated file
-			// or with file not in plist
 			unsigned int vmcnt;
 			struct kinfo_vmentry *freep = procstat_getvmmap(prstat, proc, &vmcnt);
 
-			int missing = 0;
-
-			for (unsigned y = 0; y < vmcnt; y++) {
-				struct kinfo_vmentry *kve = &freep[y];
+			for (unsigned j = 0; j < vmcnt; j++) {
+				struct kinfo_vmentry *kve = &freep[j];
 				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
 				    kve->kve_type == KVME_TYPE_VNODE &&
 				    kve->kve_path[0] == '\000') {
-					missing = 1;
+					needsrestart(proc, "Library", pathname);
 					break;
 				}
 			}
 
 			procstat_freevmmap(prstat, freep);
-
-			if (missing) {
-				printf("%05d\t%16s\t[MISSING LIB]\t%s\n", proc->ki_pid, proc->ki_comm, pathname);
-			}
 		}
 	}
 
