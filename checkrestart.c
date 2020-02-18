@@ -36,7 +36,7 @@ needsrestart(const struct kinfo_proc *proc, const char *why, const char *note) {
 		needheader = 0;
 		printf("%5s\t%16s\t%8s\t%s\n", "PID", "COMMAND", "MISSING", "ARGS");
 	}
-	printf("%05d\t%16s\t%8s\t%s\n", proc->ki_pid, proc->ki_comm, why, note);
+	printf("%5d\t%16s\t%8s\t%s\n", proc->ki_pid, proc->ki_comm, why, note);
 }
 
 int

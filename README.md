@@ -7,9 +7,9 @@ Check for processes that may require restarting.
 ```shell
 -# checkrestart
   PID            COMMAND         MISSING        ARGS
-03945              httpd         Library        /usr/local/sbin/httpd
-03572              httpd         Library        /usr/local/sbin/httpd
-03299              httpd         Library        /usr/local/sbin/httpd
+ 3945              httpd         Library        /usr/local/sbin/httpd
+ 3572              httpd         Library        /usr/local/sbin/httpd
+ 3299              httpd         Library        /usr/local/sbin/httpd
 31388              httpd         Library        /usr/local/sbin/httpd
 91629              httpd         Library        /usr/local/sbin/httpd
 68718              httpd         Library        /usr/local/sbin/httpd
@@ -17,7 +17,7 @@ Check for processes that may require restarting.
 31647              httpd         Library        /usr/local/sbin/httpd
 50138              httpd         Library        /usr/local/sbin/httpd
 59709              httpd         Library        /usr/local/sbin/httpd
-02641              httpd         Library        /usr/local/sbin/httpd
+ 2641              httpd         Library        /usr/local/sbin/httpd
 70820              httpd         Library        /usr/local/sbin/httpd
 33494              named          Binary        /usr/local/sbin/named
 44960            weechat         Library        /usr/local/bin/weechat
