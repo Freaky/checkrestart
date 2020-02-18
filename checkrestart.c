@@ -72,7 +72,7 @@ main(void) {
 				struct kinfo_vmentry *kve = &freep[y];
 				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
 				    kve->kve_type == KVME_TYPE_VNODE &&
-				    strlen(kve->kve_path) == 0) {
+				    kve->kve_path[0] == '\000') {
 					missing = 1;
 					break;
 				}
