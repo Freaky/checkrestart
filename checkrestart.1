@@ -1,0 +1,79 @@
+.\"
+.\" Copyright (c) 2020 Thomas Hurst <tom@hur.st>
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a copy
+.\" of this software and associated documentation files (the "Software"), to deal
+.\" in the Software without restriction, including without limitation the rights
+.\" to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+.\" copies of the Software, and to permit persons to whom the Software is
+.\" furnished to do so, subject to the following conditions:
+.\" 
+.\" The above copyright notice and this permission notice shall be included in all
+.\" copies or substantial portions of the Software.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+.\" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+.\" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+.\" AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+.\" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+.\" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+.\" SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt CHECKRESTART 1
+.Os
+.Sh NAME
+.Nm checkrestart
+.Nd check for processes that may need restarting
+.Sh SYNOPSIS
+.Nm checkrestart
+.Sh DESCRIPTION
+The
+.Nm
+command searches for processes without associated executable or library paths,
+implying a software upgrade has replaced them since it was started.
+.Pp
+This may produce false-positives, since paths can also be discarded by the kernel
+due to VFS cache evictions, but this is likely to be rare.
+.Pp
+.Nm
+does not perform any system changes itself - it is strictly informational.  It is
+the responsibility of the system administrator to interpret the results and take
+any necessary action.
+.Pp
+While
+.Nm
+does work partially as a normal user, it should be executed as the superuser
+for full functionality.
+.Sh EXAMPLES
+.Bd -literal -offset indent
+ # checkrestart
+  PID          COMMAND UPDATED ARGS 
+44960          weechat Library /usr/local/bin/weechat
+81345             tmux  Binary tmux: server (/tmp/tmux-1001/default)
+80307             tmux  Binary tmux: client (/tmp/tmux-1001/default)
+18115        memcached  Binary /usr/local/bin/memcached
+.Ed
+.Pp
+This output indicates
+.Nm weechat
+is using an out of date library, a
+.Nm tmux
+client/server pair is using an out-of-date executable, having replaced its
+arguments list obscuring its location, and
+.Nm memcached
+is also out of date having left its arguments list as the full path to its
+original executable.
+.Sh SEE ALSO
+.Xr procstat 1
+.Sh HISTORY
+A
+.Nm
+command first appeared in the debian-extras package in Debian Linux.
+.Pp
+This
+.Nm
+implementation performs a similar, but not identical task, and takes the name
+because why not.
+.Sh AUTHORS
+.An Thomas Hurst Aq tom@hur.st
