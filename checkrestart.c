@@ -34,9 +34,9 @@ static void
 needsrestart(const struct kinfo_proc *proc, const char *why, const char *note) {
 	if (needheader) {
 		needheader = 0;
-		printf("%5s %16s %7s %s\n", "PID", "COMMAND", "UPDATED", "ARGS");
+		printf("%5s %5s %16s %7s %s\n", "JID", "PID", "COMMAND", "UPDATED", "ARGS");
 	}
-	printf("%5d %16s %7s %s\n", proc->ki_pid, proc->ki_comm, why, note);
+	printf("%5d %5d %16s %7s %s\n", proc->ki_jid, proc->ki_pid, proc->ki_comm, why, note);
 }
 
 int

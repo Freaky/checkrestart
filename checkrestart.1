@@ -48,11 +48,11 @@ for full functionality.
 .Sh EXAMPLES
 .Bd -literal -offset indent
  # checkrestart
-  PID          COMMAND UPDATED ARGS 
-44960          weechat Library /usr/local/bin/weechat
-81345             tmux  Binary tmux: server (/tmp/tmux-1001/default)
-80307             tmux  Binary tmux: client (/tmp/tmux-1001/default)
-18115        memcached  Binary /usr/local/bin/memcached
+  JID   PID          COMMAND UPDATED ARGS 
+    0 44960          weechat Library /usr/local/bin/weechat
+    0 81345             tmux  Binary tmux: server (/tmp/tmux-1001/default)
+    0 80307             tmux  Binary tmux: client (/tmp/tmux-1001/default)
+    1 18115        memcached  Binary /usr/local/bin/memcached
 .Ed
 .Pp
 This output indicates
@@ -62,8 +62,8 @@ is using an out of date library, a
 client/server pair is using an out-of-date executable, having replaced its
 arguments list obscuring its location, and
 .Nm memcached
-is also out of date having left its arguments list as the full path to its
-original executable.
+, running in Jail 1, is also out of date having left its arguments list as the
+full path to its original executable.
 .Sh SEE ALSO
 .Xr procstat 1
 .Sh HISTORY
