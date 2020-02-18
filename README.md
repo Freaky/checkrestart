@@ -1,49 +1,43 @@
-# checkrestart
+# NAME
 
-Check for processes that may require restarting.
+**checkrestart** - check for processes that may need restarting
 
-## Example
+# SYNOPSIS
 
-```shell
--# checkrestart
-  PID          COMMAND UPDATED ARGS
- 3945            httpd Library /usr/local/sbin/httpd
- 3572            httpd Library /usr/local/sbin/httpd
- 3299            httpd Library /usr/local/sbin/httpd
-31388            httpd Library /usr/local/sbin/httpd
-91629            httpd Library /usr/local/sbin/httpd
-68718            httpd Library /usr/local/sbin/httpd
-32008            httpd Library /usr/local/sbin/httpd
-31647            httpd Library /usr/local/sbin/httpd
-50138            httpd Library /usr/local/sbin/httpd
-59709            httpd Library /usr/local/sbin/httpd
- 2641            httpd Library /usr/local/sbin/httpd
-70820            httpd Library /usr/local/sbin/httpd
-33494            named  Binary /usr/local/sbin/named
-44960          weechat Library /usr/local/bin/weechat
-81345             tmux  Binary tmux: server (/tmp/tmux-1001/default)
-80307             tmux  Binary tmux: client (/tmp/tmux-1001/default)
-59517      mosh-server  Binary mosh-server
-77424        freshclam  Binary /usr/local/bin/freshclam
-73780            clamd  Binary /usr/local/sbin/clamd
-21134        memcached Library /usr/local/bin/memcached
-22601          vnstatd  Binary /usr/local/sbin/vnstatd
-```
+**checkrestart**
 
-## How it works
+# DESCRIPTION
 
-`checkrestart` searches for processes without an associated executable path, indicating
-it's been removed or replaced.
+The **checkrestart** command searches for processes without associated executable or library paths, implying a software upgrade has replaced them since it was started.
 
-Failing that, it searches process virtual memory maps for executable file-backed mappings
-without an associated path - indicating a library that's also been removed or replaced.
+This may produce false-positives, since paths can also be discarded by the kernel due to VFS cache evictions, but this is likely to be rare.
 
-Neither of these are expected to be bullet proof - a missing path could just indicate
-the entry has been evicted from the namecache, but the approach has proven useful since
-its original implementation in [`pkg-cruft`](https://github.com/Freaky/pkg-cruft).
+**checkrestart** does not perform any system changes itself - it is strictly informational.  It is the responsibility of the system administrator to interpret the results and take any necessary action.
 
-`root` is required for full operation.
+While **checkrestart** does work partially as a normal user, it should be executed as the superuser for full functionality.
 
-## Compatibility
+# EXAMPLES
 
-Written for and tested on FreeBSD.
+	 # checkrestart
+	  PID   JID         COMMAND UPDATED ARGS
+	44960     0         weechat Library /usr/local/bin/weechat
+	81345     0            tmux  Binary tmux: server (/tmp/tmux-1001/default)
+	80307     0            tmux  Binary tmux: client (/tmp/tmux-1001/default)
+	18115     1       memcached  Binary /usr/local/bin/memcached
+
+This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached** , running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
+
+# SEE ALSO
+
+procstat(1)
+
+# HISTORY
+
+A **checkrestart** command first appeared in the debian-extras package in Debian Linux.
+
+This **checkrestart** implementation performs a similar, but not identical task, and takes the name because why not.
+
+# AUTHORS
+
+Thomas Hurst &lt;tom@hur.st&gt;
+
