@@ -6,7 +6,7 @@ Check for processes that may require restarting.
 
 ```shell
 -# checkrestart
-  PID            COMMAND         MISSING        ARGS
+  PID            COMMAND         UPDATED        ARGS
  3945              httpd         Library        /usr/local/sbin/httpd
  3572              httpd         Library        /usr/local/sbin/httpd
  3299              httpd         Library        /usr/local/sbin/httpd
