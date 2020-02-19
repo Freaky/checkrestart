@@ -1,5 +1,5 @@
 PROG=	checkrestart
-MAN=
+MAN=	checkrestart.1
 LDADD=	-lprocstat
 WARNS=	6
 
