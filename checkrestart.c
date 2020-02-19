@@ -101,7 +101,7 @@ main(int argc, char **argv) {
 			struct kinfo_vmentry *freep = procstat_getvmmap(prstat, proc, &vmcnt);
 
 			// Find executable vnode-backed mappings, usually indicating a shared library
-			for (unsigned j = 0; j < vmcnt; j++) {
+			for (unsigned int j = 0; j < vmcnt; j++) {
 				struct kinfo_vmentry *kve = &freep[j];
 				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
 				    kve->kve_type == KVME_TYPE_VNODE && !*kve->kve_path) {
