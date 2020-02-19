@@ -98,11 +98,11 @@ main(int argc, char **argv) {
 			needsrestart(proc, "Binary", args);
 		} else if (!binonly) {
 			unsigned int vmcnt;
-			struct kinfo_vmentry *freep = procstat_getvmmap(prstat, proc, &vmcnt);
+			struct kinfo_vmentry *vmaps = procstat_getvmmap(prstat, proc, &vmcnt);
 
 			// Find executable vnode-backed mappings, usually indicating a shared library
 			for (unsigned int j = 0; j < vmcnt; j++) {
-				struct kinfo_vmentry *kve = &freep[j];
+				struct kinfo_vmentry *kve = &vmaps[j];
 				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
 				    kve->kve_type == KVME_TYPE_VNODE && !*kve->kve_path) {
 					needsrestart(proc, "Library", pathname);
@@ -110,7 +110,7 @@ main(int argc, char **argv) {
 				}
 			}
 
-			procstat_freevmmap(prstat, freep);
+			procstat_freevmmap(prstat, vmaps);
 		}
 	}
 
