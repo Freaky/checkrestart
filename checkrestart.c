@@ -50,6 +50,41 @@ usage(void) {
 	exit(1);
 }
 
+static void
+checkrestart(struct procstat *prstat, struct kinfo_proc *proc) {
+	char pathname[PATH_MAX];
+
+	// Skip kernel processes
+	if (proc->ki_ppid == 0) return;
+
+	int error = getpathname(proc->ki_pid, pathname, sizeof(pathname));
+	if (error != 0 && error != ENOENT) return;
+	if (error == ENOENT) {
+		// Verify ENOENT isn't down to the process going away
+		if (kill(proc->ki_pid, 0) == -1 && errno == ESRCH) return;
+
+		// Binary path is just empty. Get its argv instead
+		char args[PATH_MAX];
+		(void)getargs(proc->ki_pid, args, sizeof(args));
+		needsrestart(proc, "Binary", args);
+	} else if (!binonly) {
+		unsigned int vmcnt;
+		struct kinfo_vmentry *vmaps = procstat_getvmmap(prstat, proc, &vmcnt);
+
+		// Find executable vnode-backed mappings, usually indicating a shared library
+		for (unsigned int j = 0; j < vmcnt; j++) {
+			struct kinfo_vmentry *kve = &vmaps[j];
+			if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
+			    kve->kve_type == KVME_TYPE_VNODE && !*kve->kve_path) {
+				needsrestart(proc, "Library", pathname);
+				break;
+			}
+		}
+
+		procstat_freevmmap(prstat, vmaps);
+	}
+}
+
 int
 main(int argc, char **argv) {
 	char ch;
@@ -80,38 +115,7 @@ main(int argc, char **argv) {
 	if (p == NULL) errx(1, "procstat_getprocs()");
 
 	for (unsigned int i = 0; i < cnt; i++) {
-		char pathname[PATH_MAX];
-		struct kinfo_proc *proc = &p[i];
-
-		// Skip kernel processes
-		if (proc->ki_ppid == 0) continue;
-
-		int error = getpathname(proc->ki_pid, pathname, sizeof(pathname));
-		if (error != 0 && error != ENOENT) continue;
-		if (error == ENOENT) {
-			// Verify ENOENT isn't down to the process going away
-			if (kill(proc->ki_pid, 0) == -1 && errno == ESRCH) continue;
-
-			// Binary path is just empty. Get its argv instead
-			char args[PATH_MAX];
-			(void)getargs(proc->ki_pid, args, sizeof(args));
-			needsrestart(proc, "Binary", args);
-		} else if (!binonly) {
-			unsigned int vmcnt;
-			struct kinfo_vmentry *vmaps = procstat_getvmmap(prstat, proc, &vmcnt);
-
-			// Find executable vnode-backed mappings, usually indicating a shared library
-			for (unsigned int j = 0; j < vmcnt; j++) {
-				struct kinfo_vmentry *kve = &vmaps[j];
-				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
-				    kve->kve_type == KVME_TYPE_VNODE && !*kve->kve_path) {
-					needsrestart(proc, "Library", pathname);
-					break;
-				}
-			}
-
-			procstat_freevmmap(prstat, vmaps);
-		}
+		checkrestart(prstat, &p[i]);
 	}
 
 	procstat_freeprocs(prstat, p);
