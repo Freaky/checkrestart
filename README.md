@@ -4,19 +4,15 @@
 
 # SYNOPSIS
 
-**checkrestart**
-\[**-Hb**]
-\[*pid&nbsp;...*]
+**checkrestart** \[**-Hb**] \[*pid&nbsp;...*]
 
 # DESCRIPTION
 
 The **checkrestart** command searches for processes without associated executable or library paths, implying a software upgrade has replaced them since it was started.
 
-This may produce false-positives, since paths can also be discarded by the kernel due to VFS cache evictions, but this is likely to be rare.
-
 **checkrestart** does not perform any system changes itself - it is strictly informational.  It is the responsibility of the system administrator to interpret the results and take any necessary action.
 
-While **checkrestart** does work partially as a normal user, it should be executed as the superuser for full functionality.
+For system-wide checks, **checkrestart** should be executed as the superuser to allow it access to global virtual memory mappings.
 
 The following options are available:
 
@@ -40,13 +36,13 @@ The following options are available:
 
 This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached** , running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
 
-# SEE ALSO
-
-procstat(1)
-
 # BUGS
 
 **checkrestart** may report false-positives due to VFS name cache evictions, though this has not yet been observed by the author.
+
+# SEE ALSO
+
+procstat(1)
 
 # HISTORY
 

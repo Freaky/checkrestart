@@ -35,18 +35,15 @@ The
 command searches for processes without associated executable or library paths,
 implying a software upgrade has replaced them since it was started.
 .Pp
-This may produce false-positives, since paths can also be discarded by the kernel
-due to VFS cache evictions, but this is likely to be rare.
-.Pp
 .Nm
 does not perform any system changes itself - it is strictly informational.  It is
 the responsibility of the system administrator to interpret the results and take
 any necessary action.
 .Pp
-While
+For system-wide checks,
 .Nm
-does work partially as a normal user, it should be executed as the superuser
-for full functionality.
+should be executed as the superuser to allow it access to global virtual memory
+mappings.
 .Pp
 The following options are available:
 .Bl -tag -width indent
@@ -74,12 +71,12 @@ arguments list obscuring its location, and
 .Nm memcached
 , running in Jail 1, is also out of date having left its arguments list as the
 full path to its original executable.
-.Sh SEE ALSO
-.Xr procstat 1
 .Sh BUGS
 .Nm
 may report false-positives due to VFS name cache evictions, though this has not
 yet been observed by the author.
+.Sh SEE ALSO
+.Xr procstat 1
 .Sh HISTORY
 A
 .Nm
