@@ -26,7 +26,8 @@
 .Nm checkrestart
 .Nd check for processes that may need restarting
 .Sh SYNOPSIS
-.Nm checkrestart
+.Nm
+.Op Fl Hb
 .Sh DESCRIPTION
 The
 .Nm
@@ -45,6 +46,14 @@ While
 .Nm
 does work partially as a normal user, it should be executed as the superuser
 for full functionality.
+.Pp
+The following options are available:
+.Bl -tag -width indent
+.It Fl H
+Suppress the header.
+.It Fl b
+Check only for missing binaries, skipping the far more expensive check for stale
+libraries.
 .Sh EXAMPLES
 .Bd -literal -offset indent
  # checkrestart

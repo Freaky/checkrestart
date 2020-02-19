@@ -7,8 +7,11 @@
 #include <errno.h>
 #include <libprocstat.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 static int needheader = 1;
+static int binonly = 0;
 
 static int
 getprocstr(pid_t pid, int node, char *str, size_t maxlen) {
@@ -39,8 +42,34 @@ needsrestart(const struct kinfo_proc *proc, const char *why, const char *note) {
 	printf("%5d %5d %16s %7s %s\n", proc->ki_pid, proc->ki_jid, proc->ki_comm, why, note);
 }
 
+static void
+usage(void) {
+	printf("usage: checkrestart [-Hb]");
+	exit(1);
+}
+
 int
-main(void) {
+main(int argc, char **argv) {
+	char ch;
+	while ((ch = getopt(argc, argv, "Hb")) != -1)
+		switch (ch) {
+			case 'H':
+				needheader = 0;
+				break;
+			case 'b':
+				binonly = 1;
+				break;
+			case '?':
+			default:
+				usage();
+		}
+
+	argc -= optind;
+	argv += optind;
+
+	// TODO: accept a list of pids
+	if (*argv) usage();
+
 	struct procstat *prstat = procstat_open_sysctl();
 	if (prstat == NULL) errx(1, "procstat_open()");
 
@@ -60,7 +89,7 @@ main(void) {
 			char args[PATH_MAX];
 			(void)getargs(proc->ki_pid, args, sizeof(args));
 			needsrestart(proc, "Binary", args);
-		} else {
+		} else if (!binonly) {
 			unsigned int vmcnt;
 			struct kinfo_vmentry *freep = procstat_getvmmap(prstat, proc, &vmcnt);
 

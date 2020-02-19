@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart**
+**checkrestart** \[**-Hb**]
 
 # DESCRIPTION
 
@@ -15,6 +15,17 @@ This may produce false-positives, since paths can also be discarded by the kerne
 **checkrestart** does not perform any system changes itself - it is strictly informational.  It is the responsibility of the system administrator to interpret the results and take any necessary action.
 
 While **checkrestart** does work partially as a normal user, it should be executed as the superuser for full functionality.
+
+The following options are available:
+
+**-H**
+
+> Suppress the header.
+
+**-b**
+
+> Check only for missing binaries, skipping the far more expensive check for stale
+> libraries.
 
 # EXAMPLES
 
@@ -40,4 +51,3 @@ This **checkrestart** implementation performs a similar, but not identical task,
 # AUTHORS
 
 Thomas Hurst &lt;tom@hur.st&gt;
-
