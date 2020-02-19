@@ -96,8 +96,7 @@ main(int argc, char **argv) {
 			for (unsigned j = 0; j < vmcnt; j++) {
 				struct kinfo_vmentry *kve = &freep[j];
 				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
-				    kve->kve_type == KVME_TYPE_VNODE &&
-				    kve->kve_path[0] == '\000') {
+				    kve->kve_type == KVME_TYPE_VNODE && !*kve->kve_path) {
 					needsrestart(proc, "Library", pathname);
 					break;
 				}
