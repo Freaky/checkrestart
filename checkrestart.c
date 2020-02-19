@@ -2,10 +2,12 @@
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/user.h>
+#include <sys/types.h>
 
 #include <err.h>
 #include <errno.h>
 #include <libprocstat.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -81,11 +83,16 @@ main(int argc, char **argv) {
 		char pathname[PATH_MAX];
 		struct kinfo_proc *proc = &p[i];
 
+		// Skip kernel processes
 		if (proc->ki_ppid == 0) continue;
 
 		int error = getpathname(proc->ki_pid, pathname, sizeof(pathname));
 		if (error != 0 && error != ENOENT) continue;
 		if (error == ENOENT) {
+			// Verify ENOENT isn't down to the process going away
+			if (kill(proc->ki_pid, 0) == -1 && errno == ESRCH) continue;
+
+			// Binary path is just empty. Get its argv instead
 			char args[PATH_MAX];
 			(void)getargs(proc->ki_pid, args, sizeof(args));
 			needsrestart(proc, "Binary", args);
@@ -93,6 +100,7 @@ main(int argc, char **argv) {
 			unsigned int vmcnt;
 			struct kinfo_vmentry *freep = procstat_getvmmap(prstat, proc, &vmcnt);
 
+			// Find executable vnode-backed mappings, usually indicating a shared library
 			for (unsigned j = 0; j < vmcnt; j++) {
 				struct kinfo_vmentry *kve = &freep[j];
 				if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
