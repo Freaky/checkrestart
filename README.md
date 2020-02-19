@@ -4,7 +4,9 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**-Hb**]
+**checkrestart**
+\[**-Hb**]
+\[*pid&nbsp;...*]
 
 # DESCRIPTION
 
@@ -41,6 +43,10 @@ This output indicates **weechat** is using an out of date library, a **tmux** cl
 # SEE ALSO
 
 procstat(1)
+
+# BUGS
+
+**checkrestart** may report false-positives due to VFS name cache evictions, though this has not yet been observed by the author.
 
 # HISTORY
 

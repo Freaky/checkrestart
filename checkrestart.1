@@ -28,6 +28,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl Hb
+.Op Ar pid ...
 .Sh DESCRIPTION
 The
 .Nm
@@ -75,6 +76,10 @@ arguments list obscuring its location, and
 full path to its original executable.
 .Sh SEE ALSO
 .Xr procstat 1
+.Sh BUGS
+.Nm
+may report false-positives due to VFS name cache evictions, though this has not
+yet been observed by the author.
 .Sh HISTORY
 A
 .Nm

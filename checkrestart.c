@@ -8,8 +8,10 @@
 #include <errno.h>
 #include <libprocstat.h>
 #include <signal.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <unistd.h>
 
 static int needheader = 1;
@@ -46,7 +48,7 @@ needsrestart(const struct kinfo_proc *proc, const char *why, const char *note) {
 
 static void
 usage(void) {
-	printf("usage: checkrestart [-Hb]");
+	printf("usage: checkrestart [-Hb] [pid [pid ...]]\n");
 	exit(1);
 }
 
@@ -104,21 +106,37 @@ main(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	// TODO: accept a list of pids
-	if (*argv) usage();
-
 	struct procstat *prstat = procstat_open_sysctl();
 	if (prstat == NULL) errx(1, "procstat_open()");
 
 	unsigned int cnt;
-	struct kinfo_proc *p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
-	if (p == NULL) errx(1, "procstat_getprocs()");
 
-	for (unsigned int i = 0; i < cnt; i++) {
-		checkrestart(prstat, &p[i]);
+	// List of pids
+	if (argc) {
+		while (argc--) {
+			char *end;
+			pid_t pid = strtoimax(*argv, &end, 10);
+			if (*end != '\0') usage();
+			struct kinfo_proc *p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
+			if (p == NULL) warn("procstat_getprocs(%d)", pid);
+			else {
+				if (cnt == 1) checkrestart(prstat, p);
+				procstat_freeprocs(prstat, p);
+			}
+			argv++;
+		}
+	} else {
+		// all processes
+		struct kinfo_proc *p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
+		if (p == NULL) errx(1, "procstat_getprocs()");
+
+		for (unsigned int i = 0; i < cnt; i++) {
+			checkrestart(prstat, &p[i]);
+		}
+
+		procstat_freeprocs(prstat, p);
 	}
 
-	procstat_freeprocs(prstat, p);
 	procstat_close(prstat);
 	return 0;
 }
