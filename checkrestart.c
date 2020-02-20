@@ -23,8 +23,12 @@ getprocstr(pid_t pid, int node, char *str, size_t maxlen) {
 	int name[4] = { CTL_KERN, KERN_PROC, node, pid };
 	str[0] = '\0';
 	int error = sysctl(name, nitems(name), str, &len, NULL, 0);
-	if (error != 0) return errno;
-	else return 0;
+	if (error != 0)
+	{
+		if (errno == ENOMEM) str[len] = '\0';
+		else return errno;
+	}
+	return 0;
 }
 
 static int
