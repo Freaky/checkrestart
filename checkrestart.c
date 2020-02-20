@@ -166,14 +166,14 @@ main(int argc, char *argv[])
 	} else {
 		p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 		if (p == NULL) {
-			errx(EXIT_FAILURE, "procstat_getprocs()");
+			warn("procstat_getprocs()");
+			rc = EXIT_FAILURE;
+		} else {
+			for (i = 0; i < cnt; i++) {
+				checkrestart(prstat, &p[i]);
+			}
+			procstat_freeprocs(prstat, p);
 		}
-
-		for (i = 0; i < cnt; i++) {
-			checkrestart(prstat, &p[i]);
-		}
-
-		procstat_freeprocs(prstat, p);
 	}
 
 	procstat_close(prstat);
