@@ -147,7 +147,7 @@ main(int argc, char *argv[])
 	if (argc) {
 		while (argc--) {
 			pid = strtoimax(*argv, &end, 10);
-			if (*end != '\0') {
+			if (*end != '\0' || pid <= 0) {
 				usage();
 			}
 
