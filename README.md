@@ -10,7 +10,7 @@
 
 The **checkrestart** command searches for processes without associated executable or library paths, implying a software upgrade has replaced them since it was started.
 
-**checkrestart** does not perform any system changes itself - it is strictly informational.  It is the responsibility of the system administrator to interpret the results and take any necessary action.
+**checkrestart** does not perform any system changes itself - it is strictly informational. It is the responsibility of the system administrator to interpret the results and take any necessary action.
 
 For system-wide checks, **checkrestart** should be executed as the superuser to allow it access to global virtual memory mappings.
 
@@ -36,14 +36,6 @@ The following options are available:
 
 This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached** , running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
 
-# BUGS
-
-**checkrestart** may report false-positives due to VFS name cache evictions, though this has not yet been observed by the author.
-
-# SEE ALSO
-
-procstat(1)
-
 # HISTORY
 
 A **checkrestart** command first appeared in the debian-extras package in Debian Linux.
@@ -53,3 +45,7 @@ This **checkrestart** implementation performs a similar, but not identical task,
 # AUTHORS
 
 Thomas Hurst &lt;tom@hur.st&gt;
+
+# BUGS
+
+**checkrestart** may report false-positives due to VFS name cache evictions, though this has not yet been observed by the author.
