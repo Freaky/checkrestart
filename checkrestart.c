@@ -12,10 +12,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sysexits.h>
 #include <unistd.h>
 
-static bool needheader = true;
 static bool binonly = false;
+static bool needheader = true;
 
 static int
 getprocstr(pid_t pid, int node, char *str, size_t maxlen)
@@ -62,7 +63,7 @@ static void
 usage(void)
 {
 	printf("usage: checkrestart [-Hb] [pid [pid ...]]\n");
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -119,6 +120,7 @@ main(int argc, char *argv[])
 	struct procstat *prstat;
 	char *end;
 	unsigned int cnt, i;
+	int rc = EXIT_SUCCESS;
 	pid_t pid;
 	char ch;
 
@@ -139,7 +141,7 @@ main(int argc, char *argv[])
 
 	prstat = procstat_open_sysctl();
 	if (prstat == NULL) {
-		errx(1, "procstat_open()");
+		errx(EXIT_FAILURE, "procstat_open()");
 	}
 
 	if (argc) {
@@ -152,6 +154,7 @@ main(int argc, char *argv[])
 			p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
 			if (p == NULL) {
 				warn("procstat_getprocs(%d)", pid);
+				rc = EXIT_FAILURE;
 			} else {
 				if (cnt == 1) {
 					checkrestart(prstat, p);
@@ -163,7 +166,7 @@ main(int argc, char *argv[])
 	} else {
 		p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 		if (p == NULL) {
-			errx(1, "procstat_getprocs()");
+			errx(EXIT_FAILURE, "procstat_getprocs()");
 		}
 
 		for (i = 0; i < cnt; i++) {
@@ -174,5 +177,5 @@ main(int argc, char *argv[])
 	}
 
 	procstat_close(prstat);
-	return (0);
+	return (rc);
 }
