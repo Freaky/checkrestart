@@ -8,11 +8,11 @@
 
 # DESCRIPTION
 
-The **checkrestart** command searches for processes without associated executable or library paths, implying a software upgrade has replaced them since it was started.
+The **checkrestart** command attempts to find processes that need restarting following a software upgrade, as indicated by their underlying executable or shared libraries no longer appearing on disk.
 
-**checkrestart** does not perform any system changes itself - it is strictly informational. It is the responsibility of the system administrator to interpret the results and take any necessary action.
+**checkrestart** does not perform any system changes itself &#8212; it is strictly informational and best-effort (See the *BUGS* section). It is the responsibility of the system administrator to interpret the results and take any necessary action.
 
-For system-wide checks, **checkrestart** should be executed as the superuser to allow it access to global virtual memory mappings.
+For full system-wide checks, **checkrestart** should be executed as the superuser to allow it access to global virtual memory mappings.
 
 The following options are available:
 
@@ -34,7 +34,11 @@ The following options are available:
 	80307     0            tmux  Binary tmux: client (/tmp/tmux-1001/default)
 	18115     1       memcached  Binary /usr/local/bin/memcached
 
-This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached** , running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
+This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached**, running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
+
+# SEE ALSO
+
+procstat(1), service(8)
 
 # HISTORY
 
@@ -42,10 +46,14 @@ A **checkrestart** command first appeared in the debian-extras package in Debian
 
 This **checkrestart** implementation performs a similar, but not identical task, and takes the name because why not.
 
+It is based on a similar implementation in the author's previous **pkg-cruft** Ruby script.
+
 # AUTHORS
 
 Thomas Hurst &lt;tom@hur.st&gt;
 
 # BUGS
 
-**checkrestart** may report false-positives due to VFS name cache evictions, though this has not yet been observed by the author.
+**checkrestart** may report both false positives and false negatives, depending on program and kernel behaviour, and should be considered strictly "best-effort".
+
+It is not currently possible to report what files are missing due to limitations of the underlying interfaces.
