@@ -61,22 +61,23 @@ getargs(pid_t pid, char *args, size_t maxlen)
 static void
 needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
 {
-	const int minwidth = 33; // sum of first 4 column widths
-	static int cmdwidth = 0; // calculated width of the rest
-
-	if (cmdwidth == 0) {
-		if (termwidth) {
-			cmdwidth = MAX(termwidth - minwidth, 8);
-		} else {
-			cmdwidth = PATH_MAX;
-		}
-	}
+	int printed;
 
 	if (needheader) {
 		needheader = false;
 		printf("%5s %5s %-12.12s %-7s %s\n", "PID", "JID", "PROCESS", "UPDATED", "COMMAND");
 	}
-	printf("%5d %5d %-12.12s %-7s %.*s\n", proc->ki_pid, proc->ki_jid, proc->ki_comm, why, cmdwidth, note);
+
+	printed = printf("%5d %5d %-12.12s %-7s ", proc->ki_pid, proc->ki_jid, proc->ki_comm, why);
+	if (printed < 0) {
+		errx(EXIT_FAILURE, "stdout");
+	}
+
+	if (termwidth) {
+		printf("%.*s\n", MAX(termwidth - printed, 8), note);
+	} else {
+		puts(note);
+	}
 }
 
 static void
