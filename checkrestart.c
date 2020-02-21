@@ -28,6 +28,30 @@ usage(void)
 }
 
 static int
+gettermwidth(void)
+{
+	struct winsize ws = { .ws_row = 0 };
+	char *colenv, *end;
+	int cols;
+
+	colenv = getenv("COLUMNS");
+	if (colenv != NULL && *colenv != '\0') {
+		cols = strtoimax(colenv, &end, 10);
+		if (*end != '\0') {
+			return cols;
+		}
+	}
+
+	if ((ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
+	    ioctl(STDERR_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
+	    ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&ws) == -1)) {
+		return 0;
+	} else {
+		return ws.ws_col;
+	}
+}
+
+static int
 getprocstr(pid_t pid, int node, char *str, size_t maxlen)
 {
 	int name[4] = { CTL_KERN, KERN_PROC, node, pid };
@@ -124,30 +148,6 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 		}
 
 		procstat_freevmmap(prstat, vmaps);
-	}
-}
-
-static int
-gettermwidth(void)
-{
-	struct winsize ws = { .ws_row = 0 };
-	char *colenv, *end;
-	int cols;
-
-	colenv = getenv("COLUMNS");
-	if (colenv != NULL && *colenv != '\0') {
-		cols = strtoimax(colenv, &end, 10);
-		if (*end != '\0') {
-			return cols;
-		}
-	}
-
-	if ((ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
-	    ioctl(STDERR_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
-	    ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&ws) == -1)) {
-		return 0;
-	} else {
-		return ws.ws_col;
 	}
 }
 
