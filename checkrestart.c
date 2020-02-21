@@ -61,12 +61,12 @@ getargs(pid_t pid, char *args, size_t maxlen)
 static void
 needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
 {
-	static int cmdwidth;
-	#define MINWIDTH 37
+	const int minwidth = 37; // sum of first 4 column widths
+	static int cmdwidth = 0; // calculated width of the rest
 
 	if (cmdwidth == 0) {
 		if (termwidth) {
-			cmdwidth = MAX(termwidth - MINWIDTH, 8);
+			cmdwidth = MAX(termwidth - minwidth, 8);
 		} else {
 			cmdwidth = PATH_MAX;
 		}
