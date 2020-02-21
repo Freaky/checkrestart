@@ -37,7 +37,7 @@ gettermwidth(void)
 	colenv = getenv("COLUMNS");
 	if (colenv != NULL && *colenv != '\0') {
 		cols = strtoimax(colenv, &end, 10);
-		if (*end != '\0') {
+		if (*end == '\0' && cols > 0) {
 			return cols;
 		}
 	}
@@ -98,7 +98,7 @@ needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
 	}
 
 	if (termwidth) {
-		printf("%.*s\n", MAX(termwidth - printed, 8), note);
+		printf("%.*s\n", MAX(termwidth - printed, 7), note);
 	} else {
 		puts(note);
 	}
