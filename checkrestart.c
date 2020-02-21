@@ -61,7 +61,7 @@ getargs(pid_t pid, char *args, size_t maxlen)
 static void
 needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
 {
-	const int minwidth = 37; // sum of first 4 column widths
+	const int minwidth = 33; // sum of first 4 column widths
 	static int cmdwidth = 0; // calculated width of the rest
 
 	if (cmdwidth == 0) {
