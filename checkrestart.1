@@ -1,4 +1,4 @@
-.Dd February 20, 2020
+.Dd February 21, 2020
 .Dt CHECKRESTART 1
 .Os
 .Sh NAME
@@ -11,15 +11,19 @@
 .Sh DESCRIPTION
 The
 .Nm
-command searches for processes without associated executable or library paths,
-implying a software upgrade has replaced them since it was started.
+command attempts to find processes that need restarting following a software
+upgrade, as indicated by their underlying executable or shared libraries no
+longer appearing on disk.
 .Pp
 .Nm
-does not perform any system changes itself - it is strictly informational.
+does not perform any system changes itself \(em it is strictly informational and
+best-effort (See the
+.Sx BUGS
+section).
 It is the responsibility of the system administrator to interpret the results
 and take any necessary action.
 .Pp
-For system-wide checks,
+For full system-wide checks,
 .Nm
 should be executed as the superuser to allow it access to global virtual memory
 mappings.
@@ -48,9 +52,12 @@ is using an out of date library, a
 .Nm tmux
 client/server pair is using an out-of-date executable, having replaced its
 arguments list obscuring its location, and
-.Nm memcached
-, running in Jail 1, is also out of date having left its arguments list as the
+.Nm memcached ,
+running in Jail 1, is also out of date having left its arguments list as the
 full path to its original executable.
+.Sh SEE ALSO
+.Xr procstat 1 ,
+.Xr service 8
 .Sh HISTORY
 A
 .Nm
@@ -60,9 +67,16 @@ This
 .Nm
 implementation performs a similar, but not identical task, and takes the name
 because why not.
+.Pp
+It is based on a similar implementation in the author's previous
+.Nm pkg-cruft
+Ruby script.
 .Sh AUTHORS
 .An Thomas Hurst Aq tom@hur.st
 .Sh BUGS
 .Nm
-may report false-positives due to VFS name cache evictions, though this has not
-yet been observed by the author.
+may report both false positives and false negatives, depending on program and
+kernel behaviour, and should be considered strictly "best-effort".
+.Pp
+It is not currently possible to report what files are missing due to limitations
+of the underlying interfaces.
