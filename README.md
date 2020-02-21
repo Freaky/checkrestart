@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**-Hb**] \[*pid&nbsp;...*]
+**checkrestart** \[**-bHw**] \[*pid&nbsp;...*]
 
 # DESCRIPTION
 
@@ -16,23 +16,27 @@ For full system-wide checks, **checkrestart** should be executed as the superuse
 
 The following options are available:
 
-**-H**
-
-> Suppress the header.
-
 **-b**
 
 > Check only for missing binaries, skipping the far more expensive check for stale
 > libraries.
 
+**-H**
+
+> Suppress the header.
+
+**-w**
+
+> Print the full width of the COMMAND column even if it will wrap in the terminal.
+
 # EXAMPLES
 
 	 # checkrestart
-	  PID   JID         PROCESS UPDATED COMMAND
-	44960     0         weechat Library /usr/local/bin/weechat
-	81345     0            tmux  Binary tmux: server (/tmp/tmux-1001/default)
-	80307     0            tmux  Binary tmux: client (/tmp/tmux-1001/default)
-	18115     1       memcached  Binary /usr/local/bin/memcached
+	  PID   JID PROCESS      UPDATED COMMAND
+	44960     0 weechat      Library /usr/local/bin/weechat
+	81345     0 tmux         Binary  tmux: server (/tmp/tmux-1001/default)
+	80307     0 tmux         Binary  tmux: client (/tmp/tmux-1001/default)
+	18115     1 memcached    Binary  /usr/local/bin/memcached
 
 This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached**, running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
 

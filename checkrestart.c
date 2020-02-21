@@ -1,6 +1,7 @@
 
 #include <sys/param.h>
 #include <sys/sysctl.h>
+#include <sys/ioctl.h>
 #include <sys/user.h>
 
 #include <err.h>
@@ -17,6 +18,14 @@
 
 static bool binonly = false;
 static bool needheader = true;
+static int termwidth = 0;
+
+static void
+usage(void)
+{
+	printf("usage: checkrestart [-bHw] [pid [pid ...]]\n");
+	exit(EXIT_FAILURE);
+}
 
 static int
 getprocstr(pid_t pid, int node, char *str, size_t maxlen)
@@ -52,18 +61,22 @@ getargs(pid_t pid, char *args, size_t maxlen)
 static void
 needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
 {
+	static int cmdwidth;
+	#define MINWIDTH 37
+
+	if (cmdwidth == 0) {
+		if (termwidth) {
+			cmdwidth = MAX(termwidth - MINWIDTH, 8);
+		} else {
+			cmdwidth = PATH_MAX;
+		}
+	}
+
 	if (needheader) {
 		needheader = false;
-		printf("%5s %5s %16s %7s %s\n", "PID", "JID", "PROCESS", "UPDATED", "COMMAND");
+		printf("%5s %5s %-12.12s %-7s %s\n", "PID", "JID", "PROCESS", "UPDATED", "COMMAND");
 	}
-	printf("%5d %5d %16s %7s %s\n", proc->ki_pid, proc->ki_jid, proc->ki_comm, why, note);
-}
-
-static void
-usage(void)
-{
-	printf("usage: checkrestart [-Hb] [pid [pid ...]]\n");
-	exit(EXIT_FAILURE);
+	printf("%5d %5d %-12.12s %-7s %.*s\n", proc->ki_pid, proc->ki_jid, proc->ki_comm, why, cmdwidth, note);
 }
 
 static void
@@ -103,13 +116,37 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 			kve = &vmaps[i];
 
 			if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
-			    kve->kve_type == KVME_TYPE_VNODE && !*kve->kve_path) {
+			    kve->kve_type == KVME_TYPE_VNODE && *kve->kve_path == '\0') {
 				needsrestart(proc, "Library", pathname);
 				break;
 			}
 		}
 
 		procstat_freevmmap(prstat, vmaps);
+	}
+}
+
+static int
+gettermwidth(void)
+{
+	struct winsize ws = { .ws_row = 0 };
+	char *colenv, *end;
+	int cols;
+
+	colenv = getenv("COLUMNS");
+	if (colenv != NULL && *colenv != '\0') {
+		cols = strtoimax(colenv, &end, 10);
+		if (*end != '\0') {
+			return cols;
+		}
+	}
+
+	if ((ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
+	    ioctl(STDERR_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
+	    ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&ws) == -1)) {
+		return 0;
+	} else {
+		return ws.ws_col;
 	}
 }
 
@@ -124,13 +161,18 @@ main(int argc, char *argv[])
 	pid_t pid;
 	char ch;
 
-	while ((ch = getopt(argc, argv, "Hb")) != -1)
+	termwidth = gettermwidth();
+
+	while ((ch = getopt(argc, argv, "bHw")) != -1)
 		switch (ch) {
+		case 'b':
+			binonly = true;
+			break;
 		case 'H':
 			needheader = false;
 			break;
-		case 'b':
-			binonly = true;
+		case 'w':
+			termwidth = 0;
 			break;
 		case '?':
 		default:
