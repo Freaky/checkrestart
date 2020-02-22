@@ -23,7 +23,7 @@ static int termwidth = 0;
 static void
 usage(void)
 {
-	printf("usage: checkrestart [-bHw] [pid [pid ...]]\n");
+	fprintf(stderr, "usage: %s [-bHw] [pid [pid ...]]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
