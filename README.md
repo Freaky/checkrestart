@@ -48,7 +48,9 @@ procstat(1), service(8)
 
 A **checkrestart** command first appeared in the debian-extras package in Debian Linux.
 
-This **checkrestart** implementation performs a similar, but not identical task, and takes the name because why not. It is based on a similar implementation in the author's previous **pkg-cruft** Ruby script.
+This implementation follows a similar idea, and is based on a prior version in the author's **pkg-cruft** Ruby script.
+
+A similar **checkrestart** command is also available as an OpenBSD port.
 
 # AUTHORS
 
