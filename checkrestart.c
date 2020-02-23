@@ -107,9 +107,9 @@ needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
 static void
 checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 {
-	char pathname[PATH_MAX], args[PATH_MAX];
-	struct kinfo_vmentry *vmaps, *kve;
-	unsigned int error, i, cnt;
+	char args[PATH_MAX], pathname[PATH_MAX];
+	struct kinfo_vmentry *kve, *vmaps;
+	unsigned int cnt, error, i;
 
 	// Skip kernel processes
 	if (proc->ki_ppid == 0) {
