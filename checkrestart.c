@@ -158,13 +158,12 @@ main(int argc, char *argv[])
 	struct procstat *prstat;
 	char *end;
 	unsigned int cnt, i;
-	int rc = EXIT_SUCCESS;
+	int ch, rc = EXIT_SUCCESS;
 	pid_t pid;
-	char ch;
 
 	termwidth = gettermwidth();
 
-	while ((ch = getopt(argc, argv, "bHw")) != -1)
+	while ((ch = getopt(argc, argv, "bHw")) != -1) {
 		switch (ch) {
 		case 'b':
 			binonly = true;
@@ -179,6 +178,7 @@ main(int argc, char *argv[])
 		default:
 			usage();
 		}
+	}
 	argc -= optind;
 	argv += optind;
 
