@@ -42,13 +42,13 @@ gettermwidth(void)
 		}
 	}
 
-	if ((ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
-	    ioctl(STDERR_FILENO, TIOCGWINSZ, (char *)&ws) == -1 &&
-	    ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&ws) == -1)) {
-		return 0;
-	} else {
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) != -1 ||
+	    ioctl(STDERR_FILENO, TIOCGWINSZ, (char *)&ws) != -1 ||
+	    ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&ws) != -1) {
 		return ws.ws_col;
 	}
+
+	return 0;
 }
 
 static int
