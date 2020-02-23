@@ -27,17 +27,24 @@ usage(void)
 	exit(EXIT_FAILURE);
 }
 
+static bool
+parse_int(const char *str, int *value) {
+	char *end;
+
+	*value = strtoimax(str, &end, 10);
+	return (*end == '\0');
+}
+
 static int
 gettermwidth(void)
 {
 	struct winsize ws = { .ws_row = 0 };
-	char *colenv, *end;
+	char *colenv;
 	int cols;
 
 	colenv = getenv("COLUMNS");
-	if (colenv != NULL && *colenv != '\0') {
-		cols = strtoimax(colenv, &end, 10);
-		if (*end == '\0' && cols > 0) {
+	if (colenv != NULL) {
+		if (parse_int(colenv, &cols) && cols > 0) {
 			return cols;
 		}
 	}
@@ -156,11 +163,11 @@ main(int argc, char *argv[])
 {
 	struct kinfo_proc *p;
 	struct procstat *prstat;
-	char *end;
 	unsigned int cnt, i;
-	int ch, rc = EXIT_SUCCESS;
+	int ch, rc;
 	pid_t pid;
 
+	rc = EXIT_SUCCESS;
 	termwidth = gettermwidth();
 
 	while ((ch = getopt(argc, argv, "bHw")) != -1) {
@@ -189,8 +196,7 @@ main(int argc, char *argv[])
 
 	if (argc) {
 		while (argc--) {
-			pid = strtoimax(*argv, &end, 10);
-			if (*end != '\0' || pid <= 0) {
+			if (!parse_int(*argv, &pid) || pid <= 0) {
 				usage();
 			}
 
