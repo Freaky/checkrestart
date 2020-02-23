@@ -1,7 +1,7 @@
 
 #include <sys/param.h>
-#include <sys/sysctl.h>
 #include <sys/ioctl.h>
+#include <sys/sysctl.h>
 #include <sys/user.h>
 
 #include <err.h>
