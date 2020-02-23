@@ -136,12 +136,12 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 			return;
 		}
 
-		// Find executable vnode-backed mappings, usually indicating a shared library
 		for (i = 0; i < cnt; i++) {
 			kve = &vmaps[i];
 
-			if ((kve->kve_protection & KVME_PROT_EXEC) == KVME_PROT_EXEC &&
-			    kve->kve_type == KVME_TYPE_VNODE && *kve->kve_path == '\0') {
+			if (kve->kve_protection & KVME_PROT_EXEC && // executable mapping
+			    kve->kve_type == KVME_TYPE_VNODE &&     // backed by a vnode
+			    kve->kve_path[0] == '\0') {             // with no associated path
 				needsrestart(proc, "Library", pathname);
 				break;
 			}
