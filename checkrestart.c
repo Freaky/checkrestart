@@ -33,7 +33,7 @@ parse_int(const char *str, int *value)
 	char *end;
 
 	*value = strtoimax(str, &end, 10);
-	return (*end == '\0');
+	return (*str != '\0' && *end == '\0');
 }
 
 static int
