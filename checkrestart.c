@@ -28,7 +28,8 @@ usage(void)
 }
 
 static bool
-parse_int(const char *str, int *value) {
+parse_int(const char *str, int *value)
+{
 	char *end;
 
 	*value = strtoimax(str, &end, 10);
