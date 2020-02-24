@@ -44,10 +44,8 @@ gettermwidth(void)
 	int cols;
 
 	colenv = getenv("COLUMNS");
-	if (colenv != NULL) {
-		if (parse_int(colenv, &cols) && cols > 0) {
-			return cols;
-		}
+	if (colenv != NULL && parse_int(colenv, &cols) && cols > 0) {
+		return cols;
 	}
 
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) != -1 ||
