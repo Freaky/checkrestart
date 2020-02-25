@@ -49,16 +49,16 @@ gettermwidth(void)
 
 	colenv = getenv("COLUMNS");
 	if (colenv != NULL && parse_int(colenv, &cols) && cols > 0) {
-		return cols;
+		return (cols);
 	}
 
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) != -1 ||
 	    ioctl(STDERR_FILENO, TIOCGWINSZ, (char *)&ws) != -1 ||
 	    ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&ws) != -1) {
-		return ws.ws_col;
+		return (ws.ws_col);
 	}
 
-	return 0;
+	return (0);
 }
 
 static int
