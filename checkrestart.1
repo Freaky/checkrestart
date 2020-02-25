@@ -8,6 +8,7 @@
 .Nm
 .Op Fl -libxo
 .Op Fl bHw
+.Op Fl j Ar JID
 .Op Ar pid ...
 .Sh DESCRIPTION
 The
@@ -45,6 +46,8 @@ libraries.
 Suppress the header.
 .It Fl w
 Print the full width of the COMMAND column even if it will wrap in the terminal.
+.It Fl j Ar JID
+Filter output by specified JID.
 .El
 .Sh EXAMPLES
 .Bd -literal -offset indent

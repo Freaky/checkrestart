@@ -23,11 +23,12 @@
 static bool binonly = false;
 static bool needheader = true;
 static int termwidth = 0;
+static int jid = -1;
 
 static void
 usage(void)
 {
-	xo_error("usage: %s [--libxo] [-bHw] [pid [pid ...]]\n", getprogname());
+	xo_error("usage: %s [--libxo] [-bHw] [-j jid] [pid [pid ...]]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
@@ -136,6 +137,11 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 		return;
 	}
 
+	// If -j is specified and value is a valid JID, skip non-matching JID
+	if (jid >= 0 && proc->ki_jid != jid) {
+		return;
+	}
+
 	error = getpathname(proc->ki_pid, pathname, sizeof(pathname));
 	if (error != 0 && error != ENOENT) {
 		return;
@@ -187,7 +193,7 @@ main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	}
 
-	while ((ch = getopt(argc, argv, "bHw")) != -1) {
+	while ((ch = getopt(argc, argv, "bHwj:")) != -1) {
 		switch (ch) {
 		case 'b':
 			binonly = true;
@@ -197,6 +203,9 @@ main(int argc, char *argv[])
 			break;
 		case 'w':
 			termwidth = 0;
+			break;
+		case 'j':
+			jid = atoi(optarg);
 			break;
 		case '?':
 		default:
