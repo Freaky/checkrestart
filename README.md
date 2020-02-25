@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**--libxo**] \[**-bHw**] \[*pid&nbsp;...*]
+**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*JID*] \[*pid&nbsp;...*]
 
 # DESCRIPTION
 
@@ -33,6 +33,10 @@ The following options are available:
 **-w**
 
 > Print the full width of the COMMAND column even if it will wrap in the terminal.
+
+**-j** *JID*
+
+> Filter output by specified JID.
 
 # EXAMPLES
 
