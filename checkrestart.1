@@ -8,7 +8,7 @@
 .Nm
 .Op Fl -libxo
 .Op Fl bHw
-.Op Fl j Ar JID
+.Op Fl j Ar jid
 .Op Ar pid ...
 .Sh DESCRIPTION
 The
@@ -46,8 +46,8 @@ libraries.
 Suppress the header.
 .It Fl w
 Print the full width of the COMMAND column even if it will wrap in the terminal.
-.It Fl j Ar JID
-Filter output by specified JID.
+.It Fl j Ar jid
+Filter output by specified Jail ID.
 .El
 .Sh EXAMPLES
 .Bd -literal -offset indent
@@ -72,6 +72,7 @@ full path to its original executable.
 .Xr procstat 1 ,
 .Xr libxo 3 ,
 .Xr xo_parse_args 3 ,
+.Xr jail 8 ,
 .Xr service 8
 .Sh HISTORY
 A

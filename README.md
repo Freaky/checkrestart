@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*JID*] \[*pid&nbsp;...*]
+**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*jid*] \[*pid&nbsp;...*]
 
 # DESCRIPTION
 
@@ -34,9 +34,9 @@ The following options are available:
 
 > Print the full width of the COMMAND column even if it will wrap in the terminal.
 
-**-j** *JID*
+**-j** *jid*
 
-> Filter output by specified JID.
+> Filter output by specified Jail ID.
 
 # EXAMPLES
 
@@ -51,7 +51,7 @@ This output indicates **weechat** is using an out of date library, a **tmux** cl
 
 # SEE ALSO
 
-procstat(1), libxo(3), xo\_parse\_args(3), service(8)
+procstat(1), libxo(3), xo\_parse\_args(3), jail(8), service(8)
 
 # HISTORY
 
