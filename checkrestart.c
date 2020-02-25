@@ -113,7 +113,7 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 
 	xo_open_instance("process");
 	xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);  col += 6;
-	xo_emit("{k:jid/%5d/%d} ",      proc->ki_jid);  col += 6;
+	xo_emit("{:jid/%5d/%d} ",       proc->ki_jid);  col += 6;
 	xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm); col += 13;
 	xo_emit("{:updated/%-7s/%s} ",  updated);       col += 8;
 
