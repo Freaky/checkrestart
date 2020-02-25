@@ -27,7 +27,7 @@ static int termwidth = 0;
 static void
 usage(void)
 {
-	xo_error("usage: %s [-bHw] [pid [pid ...]]\n", getprogname());
+	xo_error("usage: %s [--libxo] [-bHw] [pid [pid ...]]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
