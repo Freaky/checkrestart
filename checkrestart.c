@@ -1,12 +1,14 @@
 
 #include <sys/param.h>
 #include <sys/ioctl.h>
+#include <sys/jail.h>
 #include <sys/sysctl.h>
 #include <sys/user.h>
 
 #include <err.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <jail.h>
 #include <libprocstat.h>
 #include <libxo/xo.h>
 #include <limits.h>
@@ -28,7 +30,7 @@ static bool needheader = true;
 static void
 usage(void)
 {
-	xo_error("usage: %s [--libxo] [-bHw] [-j jid] [pid [pid ...]]\n", getprogname());
+	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [pid [pid ...]]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
@@ -202,8 +204,15 @@ main(int argc, char *argv[])
 			needheader = false;
 			break;
 		case 'j':
-			if (!parse_int(optarg, &jid) || jid < 0) {
-				usage();
+			if (parse_int(optarg, &jid)) {
+				if (jid <= 0) {
+					usage();
+				}
+			} else {
+				jid = jail_getid(optarg);
+				if (jid == -1) {
+					xo_errx(EXIT_FAILURE, "jail \"%s\" not found", optarg);
+				}
 			}
 			break;
 		case 'w':

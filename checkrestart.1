@@ -8,7 +8,7 @@
 .Nm
 .Op Fl -libxo
 .Op Fl bHw
-.Op Fl j Ar jid
+.Op Fl j Ar jail
 .Op Ar pid ...
 .Sh DESCRIPTION
 The
@@ -46,8 +46,8 @@ libraries.
 Suppress the header.
 .It Fl w
 Print the full width of the COMMAND column even if it will wrap in the terminal.
-.It Fl j Ar jid
-Filter output by specified Jail ID.
+.It Fl j Ar jail
+Filter output by specified jail name or ID.
 .El
 .Sh EXAMPLES
 .Bd -literal -offset indent
@@ -66,7 +66,7 @@ is using an out of date library, a
 client/server pair is using an out-of-date executable, having replaced its
 arguments list obscuring its location, and
 .Nm memcached ,
-running in Jail 1, is also out of date having left its arguments list as the
+running in jail 1, is also out of date having left its arguments list as the
 full path to its original executable.
 .Sh SEE ALSO
 .Xr procstat 1 ,

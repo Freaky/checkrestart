@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*jid*] \[*pid&nbsp;...*]
+**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*jail*] \[*pid&nbsp;...*]
 
 # DESCRIPTION
 
@@ -34,9 +34,9 @@ The following options are available:
 
 > Print the full width of the COMMAND column even if it will wrap in the terminal.
 
-**-j** *jid*
+**-j** *jail*
 
-> Filter output by specified Jail ID.
+> Filter output by specified jail name or ID.
 
 # EXAMPLES
 
@@ -47,7 +47,7 @@ The following options are available:
 	80307     0 tmux         Binary  tmux: client (/tmp/tmux-1001/default)
 	18115     1 memcached    Binary  /usr/local/bin/memcached
 
-This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached**, running in Jail 1, is also out of date having left its arguments list as the full path to its original executable.
+This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached**, running in jail 1, is also out of date having left its arguments list as the full path to its original executable.
 
 # SEE ALSO
 
