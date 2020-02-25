@@ -18,7 +18,7 @@
 #include <sysexits.h>
 #include <unistd.h>
 
-#define CHECKRESTART_XO_VERSION "1"
+#define CHECKRESTART_XO_VERSION "2"
 
 static bool binonly = false;
 static bool needheader = true;
@@ -96,7 +96,6 @@ static void
 needsrestart(const struct kinfo_proc *proc, const char *updated, const char *command)
 {
 	char fmtbuf[40];
-	char pidstr[12];
 	int col, width;
 
 	col = 0;
@@ -105,16 +104,15 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 		needheader = false;
 		xo_emit(
 		    "{T:/%5s} {T:/%5s} {T:/%-12.12s} {T:/%-7s} {T:/%s}\n",
-		    "PID", "JID", "PROCESS", "UPDATED", "COMMAND"
+		    "PID", "JID", "NAME", "UPDATED", "COMMAND"
 		);
 	}
 
-	snprintf(pidstr, sizeof(pidstr), "%d", proc->ki_pid);
-	xo_open_container(pidstr);
-	xo_emit("{k:process_id/%5d/%d} ",  proc->ki_pid);  col += 6;
-	xo_emit("{k:jail_id/%5d/%d} ",     proc->ki_jid);  col += 6;
-	xo_emit("{:process/%-12.12s/%s} ", proc->ki_comm); col += 13;
-	xo_emit("{:updated/%-7s/%s} ",     updated);       col += 8;
+	xo_open_instance("process");
+	xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);  col += 6;
+	xo_emit("{k:jid/%5d/%d} ",      proc->ki_jid);  col += 6;
+	xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm); col += 13;
+	xo_emit("{:updated/%-7s/%s} ",  updated);       col += 8;
 
 	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
 		width = MAX(termwidth - col, 7);
@@ -123,7 +121,7 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 	} else {
 		xo_emit("{:command/%s}\n", command);
 	}
-	xo_close_container(pidstr);
+	xo_close_instance("process");
 }
 
 static void
@@ -214,6 +212,7 @@ main(int argc, char *argv[])
 
 	xo_set_version(CHECKRESTART_XO_VERSION);
 	xo_open_container("checkrestart");
+	xo_open_list("process");
 
 	if (argc) {
 		while (argc--) {
@@ -246,8 +245,10 @@ main(int argc, char *argv[])
 		}
 	}
 
-	procstat_close(prstat);
+	xo_close_list("process");
 	xo_close_container("checkrestart");
 	xo_finish();
+
+	procstat_close(prstat);
 	return (rc);
 }

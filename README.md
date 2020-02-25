@@ -37,7 +37,7 @@ The following options are available:
 # EXAMPLES
 
 	 # checkrestart
-	  PID   JID PROCESS      UPDATED COMMAND
+	  PID   JID NAME         UPDATED COMMAND
 	44960     0 weechat      Library /usr/local/bin/weechat
 	81345     0 tmux         Binary  tmux: server (/tmp/tmux-1001/default)
 	80307     0 tmux         Binary  tmux: client (/tmp/tmux-1001/default)
