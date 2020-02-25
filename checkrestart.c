@@ -185,6 +185,8 @@ main(int argc, char *argv[])
 	rc = EXIT_SUCCESS;
 	termwidth = gettermwidth();
 	argc = xo_parse_args(argc, argv);
+	if (argc < 0)
+		return (EXIT_FAILURE);
 
 	while ((ch = getopt(argc, argv, "bHw")) != -1) {
 		switch (ch) {
