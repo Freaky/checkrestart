@@ -20,10 +20,10 @@
 
 #define CHECKRESTART_XO_VERSION "1"
 
+static int jid = -1;
+static int termwidth = 0;
 static bool binonly = false;
 static bool needheader = true;
-static int termwidth = 0;
-static int jid = -1;
 
 static void
 usage(void)
@@ -193,7 +193,7 @@ main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	}
 
-	while ((ch = getopt(argc, argv, "bHwj:")) != -1) {
+	while ((ch = getopt(argc, argv, "bHj:w")) != -1) {
 		switch (ch) {
 		case 'b':
 			binonly = true;
@@ -201,11 +201,13 @@ main(int argc, char *argv[])
 		case 'H':
 			needheader = false;
 			break;
+		case 'j':
+			if (!parse_int(optarg, &jid) || jid < 0) {
+				usage();
+			}
+			break;
 		case 'w':
 			termwidth = 0;
-			break;
-		case 'j':
-			jid = atoi(optarg);
 			break;
 		case '?':
 		default:
