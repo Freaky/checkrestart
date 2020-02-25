@@ -1,6 +1,6 @@
 PROG=	checkrestart
 MAN=	checkrestart.1
-LDADD=	-lprocstat
+LDADD=	-lprocstat -lxo
 WARNS=	6
 
 .include <bsd.prog.mk>

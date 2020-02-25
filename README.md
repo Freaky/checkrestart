@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**-bHw**] \[*pid&nbsp;...*]
+**checkrestart** \[**--libxo**] \[**-bHw**] \[*pid&nbsp;...*]
 
 # DESCRIPTION
 
@@ -15,6 +15,11 @@ The **checkrestart** command attempts to find processes that need restarting fol
 For full system-wide checks, **checkrestart** should be executed as the superuser to allow it access to global virtual memory mappings.
 
 The following options are available:
+
+**--libxo**
+
+> Generate formatted output via libxo(3) in a selection of human and machine-readable formats.
+> See xo\_parse\_args(3) for details on available arguments.
 
 **-b**
 
@@ -42,7 +47,7 @@ This output indicates **weechat** is using an out of date library, a **tmux** cl
 
 # SEE ALSO
 
-procstat(1), service(8)
+procstat(1), libxo(3), xo\_parse\_args(3), service(8)
 
 # HISTORY
 
@@ -60,4 +65,6 @@ Thomas Hurst &lt;tom@hur.st&gt;
 
 **checkrestart** may report both false positives and false negatives, depending on program and kernel behaviour, and should be considered strictly "best-effort".
 
-It is not currently possible to report what files are missing due to limitations of the underlying interfaces.
+In particular, retrieval of pathnames is implemented using the kernel's name cache &#8212; if an executable or library path is not in the name cache due to an eviction, or use of a file system which does not use the name cache, **checkrestart** will consider this the same as if a file is missing.
+
+The use of the name cache also means it is not yet possible to report which files are considered missing.

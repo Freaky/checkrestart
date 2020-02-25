@@ -6,6 +6,7 @@
 .Nd check for processes that may need restarting
 .Sh SYNOPSIS
 .Nm
+.Op Fl -libxo
 .Op Fl bHw
 .Op Ar pid ...
 .Sh DESCRIPTION
@@ -30,6 +31,13 @@ mappings.
 .Pp
 The following options are available:
 .Bl -tag -width indent
+.It Fl -libxo
+Generate formatted output via
+.Xr libxo 3
+in a selection of human and machine-readable formats.
+See
+.Xr xo_parse_args 3
+for details on available arguments.
 .It Fl b
 Check only for missing binaries, skipping the far more expensive check for stale
 libraries.
@@ -59,6 +67,8 @@ running in Jail 1, is also out of date having left its arguments list as the
 full path to its original executable.
 .Sh SEE ALSO
 .Xr procstat 1 ,
+.Xr libxo 3 ,
+.Xr xo_parse_args 3 ,
 .Xr service 8
 .Sh HISTORY
 A
@@ -82,5 +92,11 @@ port.
 may report both false positives and false negatives, depending on program and
 kernel behaviour, and should be considered strictly "best-effort".
 .Pp
-It is not currently possible to report what files are missing due to limitations
-of the underlying interfaces.
+In particular, retrieval of pathnames is implemented using the kernel's name
+cache \(em if an executable or library path is not in the name cache due to
+an eviction, or use of a file system which does not use the name cache,
+.Nm
+will consider this the same as if a file is missing.
+.Pp
+The use of the name cache also means it is not yet possible to report which
+files are considered missing.

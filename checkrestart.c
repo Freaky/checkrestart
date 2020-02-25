@@ -8,13 +8,17 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <libprocstat.h>
+#include <libxo/xo.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
+
+#define CHECKRESTART_XO_VERSION "1"
 
 static bool binonly = false;
 static bool needheader = true;
@@ -23,7 +27,7 @@ static int termwidth = 0;
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-bHw] [pid [pid ...]]\n", getprogname());
+	xo_error("usage: %s [-bHw] [pid [pid ...]]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
@@ -89,25 +93,37 @@ getargs(pid_t pid, char *args, size_t maxlen)
 }
 
 static void
-needsrestart(const struct kinfo_proc *proc, const char *why, const char *note)
+needsrestart(const struct kinfo_proc *proc, const char *updated, const char *command)
 {
-	int printed;
+	char fmtbuf[40];
+	char pidstr[12];
+	int col, width;
+
+	col = 0;
 
 	if (needheader) {
 		needheader = false;
-		printf("%5s %5s %-12.12s %-7s %s\n", "PID", "JID", "PROCESS", "UPDATED", "COMMAND");
+		xo_emit(
+		    "{T:/%5s} {T:/%5s} {T:/%-12.12s} {T:/%-7s} {T:/%s}\n",
+		    "PID", "JID", "PROCESS", "UPDATED", "COMMAND"
+		);
 	}
 
-	printed = printf("%5d %5d %-12.12s %-7s ", proc->ki_pid, proc->ki_jid, proc->ki_comm, why);
-	if (printed < 0) {
-		errx(EXIT_FAILURE, "stdout");
-	}
+	snprintf(pidstr, sizeof(pidstr), "%d", proc->ki_pid);
+	xo_open_container(pidstr);
+	xo_emit("{k:process_id/%5d/%d} ",  proc->ki_pid);  col += 6;
+	xo_emit("{k:jail_id/%5d/%d} ",     proc->ki_jid);  col += 6;
+	xo_emit("{:process/%-12.12s/%s} ", proc->ki_comm); col += 13;
+	xo_emit("{:updated/%-7s/%s} ",     updated);       col += 8;
 
-	if (termwidth) {
-		printf("%.*s\n", MAX(termwidth - printed, 7), note);
+	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
+		width = MAX(termwidth - col, 7);
+		snprintf(fmtbuf, sizeof(fmtbuf), "{:command/%%-%d.%ds}\n", width, width);
+		xo_emit(fmtbuf, command);
 	} else {
-		puts(note);
+		xo_emit("{:command/%s}\n", command);
 	}
+	xo_close_container(pidstr);
 }
 
 static void
@@ -168,6 +184,7 @@ main(int argc, char *argv[])
 
 	rc = EXIT_SUCCESS;
 	termwidth = gettermwidth();
+	argc = xo_parse_args(argc, argv);
 
 	while ((ch = getopt(argc, argv, "bHw")) != -1) {
 		switch (ch) {
@@ -190,8 +207,11 @@ main(int argc, char *argv[])
 
 	prstat = procstat_open_sysctl();
 	if (prstat == NULL) {
-		errx(EXIT_FAILURE, "procstat_open()");
+		xo_errx(EXIT_FAILURE, "procstat_open()");
 	}
+
+	xo_set_version(CHECKRESTART_XO_VERSION);
+	xo_open_container("checkrestart");
 
 	if (argc) {
 		while (argc--) {
@@ -201,7 +221,7 @@ main(int argc, char *argv[])
 
 			p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
 			if (p == NULL) {
-				warn("procstat_getprocs(%d)", pid);
+				xo_warn("procstat_getprocs(%d)", pid);
 				rc = EXIT_FAILURE;
 			} else {
 				if (cnt == 1) {
@@ -214,7 +234,7 @@ main(int argc, char *argv[])
 	} else {
 		p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 		if (p == NULL) {
-			warn("procstat_getprocs()");
+			xo_warn("procstat_getprocs()");
 			rc = EXIT_FAILURE;
 		} else {
 			for (i = 0; i < cnt; i++) {
@@ -225,5 +245,7 @@ main(int argc, char *argv[])
 	}
 
 	procstat_close(prstat);
+	xo_close_container("checkrestart");
+	xo_finish();
 	return (rc);
 }
