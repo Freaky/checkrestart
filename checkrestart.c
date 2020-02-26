@@ -98,10 +98,8 @@ getargs(pid_t pid, char *args, size_t maxlen)
 static void
 needsrestart(const struct kinfo_proc *proc, const char *updated, const char *command)
 {
-	char fmtbuf[40];
+	char fmtbuf[sizeof("{:command/%-4294967295.4294967295s}\n")];
 	int col, width;
-
-	col = 0;
 
 	if (needheader) {
 		needheader = false;
@@ -112,10 +110,10 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 	}
 
 	xo_open_instance("process");
-	xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);  col += 6;
-	xo_emit("{:jid/%5d/%d} ",       proc->ki_jid);  col += 6;
-	xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm); col += 13;
-	xo_emit("{:updated/%-7s/%s} ",  updated);       col += 8;
+	col  = xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);
+	col += xo_emit("{:jid/%5d/%d} ",       proc->ki_jid);
+	col += xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm);
+	col += xo_emit("{:updated/%-7s/%s} ",  updated);
 
 	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
 		width = MAX(termwidth - col, 7);
@@ -190,6 +188,8 @@ main(int argc, char *argv[])
 
 	rc = EXIT_SUCCESS;
 	termwidth = gettermwidth();
+
+	xo_set_flags(NULL, XOF_WARN | XOF_COLUMNS);
 	argc = xo_parse_args(argc, argv);
 	if (argc < 0) {
 		return (EXIT_FAILURE);
