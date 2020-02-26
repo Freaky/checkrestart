@@ -20,7 +20,9 @@
 #include <sysexits.h>
 #include <unistd.h>
 
-#define CHECKRESTART_XO_VERSION "1"
+#define CHECKRESTART_XO_VERSION   "1"
+#define CHECKRESTART_XO_CONTAINER "checkrestart"
+#define CHECKRESTART_XO_PROCESS   "process"
 
 static int jid = -1;
 static int termwidth = 0;
@@ -109,7 +111,7 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 		);
 	}
 
-	xo_open_instance("process");
+	xo_open_instance(CHECKRESTART_XO_PROCESS);
 	col  = xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);
 	col += xo_emit("{:jid/%5d/%d} ",       proc->ki_jid);
 	col += xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm);
@@ -122,7 +124,7 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 	} else {
 		xo_emit("{:command/%s}\n", command);
 	}
-	xo_close_instance("process");
+	xo_close_instance(CHECKRESTART_XO_PROCESS);
 }
 
 static void
@@ -232,8 +234,8 @@ main(int argc, char *argv[])
 	}
 
 	xo_set_version(CHECKRESTART_XO_VERSION);
-	xo_open_container("checkrestart");
-	xo_open_list("process");
+	xo_open_container(CHECKRESTART_XO_CONTAINER);
+	xo_open_list(CHECKRESTART_XO_PROCESS);
 
 	if (argc) {
 		while (argc--) {
@@ -266,8 +268,8 @@ main(int argc, char *argv[])
 		}
 	}
 
-	xo_close_list("process");
-	xo_close_container("checkrestart");
+	xo_close_list(CHECKRESTART_XO_PROCESS);
+	xo_close_container(CHECKRESTART_XO_CONTAINER);
 	xo_finish();
 
 	procstat_close(prstat);
