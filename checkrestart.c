@@ -116,7 +116,7 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 	col += xo_emit("{:updated/%-7s/%s} ",  updated);
 
 	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
-		width = MAX(termwidth - col, 7);
+		width = MAX(termwidth - col, (int)sizeof("COMMAND") - 1);
 		snprintf(fmtbuf, sizeof(fmtbuf), "{:command/%%-%d.%ds}\n", width, width);
 		xo_emit(fmtbuf, command);
 	} else {
