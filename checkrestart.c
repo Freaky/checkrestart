@@ -240,9 +240,12 @@ main(int argc, char *argv[])
 	if (argc) {
 		while (argc--) {
 			if (!parse_int(*argv, &pid)) {
+				pid = 0;
 				p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 			} else if (pid > 0) {
 				p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
+			} else if (pid < 0) {
+				p = procstat_getprocs(prstat, KERN_PROC_PGRP, abs(pid), &cnt);
 			} else {
 				usage();
 			}
@@ -252,7 +255,7 @@ main(int argc, char *argv[])
 				rc = EXIT_FAILURE;
 			} else {
 				for (i = 0; i < cnt; i++) {
-					if (pid > 0 || strcmp(*argv, p[i].ki_comm) == 0) {
+					if (pid != 0 || strcmp(*argv, p[i].ki_comm) == 0) {
 						checkrestart(prstat, &p[i]);
 					}
 				}
