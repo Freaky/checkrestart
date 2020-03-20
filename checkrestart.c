@@ -187,6 +187,7 @@ main(int argc, char *argv[])
 	unsigned int cnt, i;
 	int ch, rc;
 	pid_t pid;
+	bool found;
 
 	rc = EXIT_SUCCESS;
 	termwidth = gettermwidth();
@@ -237,43 +238,46 @@ main(int argc, char *argv[])
 	xo_open_container(CHECKRESTART_XO_CONTAINER);
 	xo_open_list(CHECKRESTART_XO_PROCESS);
 
-	if (argc) {
-		while (argc--) {
-			if (!parse_int(*argv, &pid)) {
-				pid = 0;
-				p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
-			} else if (pid > 0) {
-				p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
-			} else if (pid < 0) {
-				p = procstat_getprocs(prstat, KERN_PROC_PGRP, abs(pid), &cnt);
-			} else {
-				usage();
-			}
+	p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
+	if (p == NULL) {
+		xo_warn("procstat_getprocs()");
+		rc = EXIT_FAILURE;
+	} else {
+		if (argc) {
+			while (argc--) {
+				found = false;
 
-			if (p == NULL) {
-				xo_warn("procstat_getprocs(%s)", *argv);
-				rc = EXIT_FAILURE;
-			} else {
+				if (!parse_int(*argv, &pid)) {
+					pid = 0;
+				} else if (pid == 0) {
+					usage();
+				}
+
 				for (i = 0; i < cnt; i++) {
-					if (pid != 0 || strcmp(*argv, p[i].ki_comm) == 0) {
+					if (
+					    (pid < 0 && p[i].ki_pgid == abs(pid)) ||
+					    (pid > 0 && p[i].ki_pid == pid) ||
+					    (pid == 0 && strcmp(*argv, p[i].ki_comm) == 0)
+					) {
+						found = true;
 						checkrestart(prstat, &p[i]);
 					}
 				}
-				procstat_freeprocs(prstat, p);
+
+				if (!found) {
+					rc = EXIT_FAILURE;
+					xo_warn_c(ESRCH, "%s", *argv);
+				}
+
+				argv++;
 			}
-			argv++;
-		}
-	} else {
-		p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
-		if (p == NULL) {
-			xo_warn("procstat_getprocs()");
-			rc = EXIT_FAILURE;
 		} else {
 			for (i = 0; i < cnt; i++) {
 				checkrestart(prstat, &p[i]);
 			}
-			procstat_freeprocs(prstat, p);
 		}
+
+		procstat_freeprocs(prstat, p);
 	}
 
 	xo_close_list(CHECKRESTART_XO_PROCESS);
