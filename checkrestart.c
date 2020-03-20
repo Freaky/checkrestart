@@ -32,7 +32,7 @@ static bool needheader = true;
 static void
 usage(void)
 {
-	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [pid [pid ...]]\n", getprogname());
+	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [proc [proc ...]]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
@@ -239,17 +239,22 @@ main(int argc, char *argv[])
 
 	if (argc) {
 		while (argc--) {
-			if (!parse_int(*argv, &pid) || pid <= 0) {
+			if (!parse_int(*argv, &pid)) {
+				p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
+			} else if (pid > 0) {
+				p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
+			} else {
 				usage();
 			}
 
-			p = procstat_getprocs(prstat, KERN_PROC_PID, pid, &cnt);
 			if (p == NULL) {
-				xo_warn("procstat_getprocs(%d)", pid);
+				xo_warn("procstat_getprocs(%s)", *argv);
 				rc = EXIT_FAILURE;
 			} else {
-				if (cnt == 1) {
-					checkrestart(prstat, p);
+				for (i = 0; i < cnt; i++) {
+					if (pid > 0 || strcmp(*argv, p[i].ki_comm) == 0) {
+						checkrestart(prstat, &p[i]);
+					}
 				}
 				procstat_freeprocs(prstat, p);
 			}
