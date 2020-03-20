@@ -185,11 +185,10 @@ main(int argc, char *argv[])
 	struct kinfo_proc *p;
 	struct procstat *prstat;
 	unsigned int cnt, i;
-	int ch, rc;
+	int ch, rc, filterc;
 	pid_t pid;
-	bool found;
 
-	rc = EXIT_SUCCESS;
+	rc = EXIT_FAILURE;
 	termwidth = gettermwidth();
 
 	xo_set_flags(NULL, XOF_WARN | XOF_COLUMNS);
@@ -241,38 +240,29 @@ main(int argc, char *argv[])
 	p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 	if (p == NULL) {
 		xo_warn("procstat_getprocs()");
-		rc = EXIT_FAILURE;
 	} else {
-		if (argc) {
-			while (argc--) {
-				found = false;
+		for (i = 0; i < cnt; i++) {
+			if (argc) {
+				for (filterc = 0; filterc < argc; filterc++) {
 
-				if (!parse_int(*argv, &pid)) {
-					pid = 0;
-				} else if (pid == 0) {
-					usage();
-				}
+					if (!parse_int(argv[filterc], &pid)) {
+						pid = 0;
+					} else if (pid == 0) {
+						usage();
+					}
 
-				for (i = 0; i < cnt; i++) {
 					if (
 					    (pid < 0 && p[i].ki_pgid == abs(pid)) ||
 					    (pid > 0 && p[i].ki_pid == pid) ||
 					    (pid == 0 && strcmp(*argv, p[i].ki_comm) == 0)
 					) {
-						found = true;
+						rc = EXIT_SUCCESS;
 						checkrestart(prstat, &p[i]);
+						break;
 					}
 				}
-
-				if (!found) {
-					rc = EXIT_FAILURE;
-					xo_warn_c(ESRCH, "%s", *argv);
-				}
-
-				argv++;
-			}
-		} else {
-			for (i = 0; i < cnt; i++) {
+			} else {
+				rc = EXIT_SUCCESS;
 				checkrestart(prstat, &p[i]);
 			}
 		}
