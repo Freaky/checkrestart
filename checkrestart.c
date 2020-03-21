@@ -234,18 +234,17 @@ main(int argc, char *argv[])
 		xo_errx(EXIT_FAILURE, "procstat_open()");
 	}
 
-	xo_set_version(CHECKRESTART_XO_VERSION);
-	xo_open_container(CHECKRESTART_XO_CONTAINER);
-	xo_open_list(CHECKRESTART_XO_PROCESS);
-
 	p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
 	if (p == NULL) {
 		xo_warn("procstat_getprocs()");
 	} else {
+		xo_set_version(CHECKRESTART_XO_VERSION);
+		xo_open_container(CHECKRESTART_XO_CONTAINER);
+		xo_open_list(CHECKRESTART_XO_PROCESS);
+
 		for (i = 0; i < cnt; i++) {
 			if (argc) {
 				for (filterc = 0; filterc < argc; filterc++) {
-
 					if (!parse_int(argv[filterc], &pid)) {
 						pid = 0;
 					} else if (pid == 0) {
@@ -253,8 +252,8 @@ main(int argc, char *argv[])
 					}
 
 					if (
-					    (pid < 0 && p[i].ki_pgid == abs(pid)) ||
 					    (pid > 0 && p[i].ki_pid == pid) ||
+					    (pid < 0 && p[i].ki_pgid == abs(pid)) ||
 					    (pid == 0 && strcmp(argv[filterc], p[i].ki_comm) == 0)
 					) {
 						rc = EXIT_SUCCESS;
@@ -268,11 +267,11 @@ main(int argc, char *argv[])
 			}
 		}
 
+		xo_close_list(CHECKRESTART_XO_PROCESS);
+		xo_close_container(CHECKRESTART_XO_CONTAINER);
+
 		procstat_freeprocs(prstat, p);
 	}
-
-	xo_close_list(CHECKRESTART_XO_PROCESS);
-	xo_close_container(CHECKRESTART_XO_CONTAINER);
 	xo_finish();
 
 	procstat_close(prstat);
