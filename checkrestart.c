@@ -254,7 +254,7 @@ main(int argc, char *argv[])
 					if (
 					    (pid < 0 && p[i].ki_pgid == abs(pid)) ||
 					    (pid > 0 && p[i].ki_pid == pid) ||
-					    (pid == 0 && strcmp(*argv, p[i].ki_comm) == 0)
+					    (pid == 0 && strcmp(argv[filterc], p[i].ki_comm) == 0)
 					) {
 						rc = EXIT_SUCCESS;
 						checkrestart(prstat, &p[i]);
