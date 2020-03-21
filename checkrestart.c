@@ -32,7 +32,7 @@ static bool needheader = true;
 static void
 usage(void)
 {
-	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [proc [proc ...]]\n", getprogname());
+	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [proc ...]\n", getprogname());
 	exit(EXIT_FAILURE);
 }
 
