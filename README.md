@@ -4,7 +4,7 @@
 
 # SYNOPSIS
 
-**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*jail*] \[*pid&nbsp;...*]
+**checkrestart** \[**--libxo**] \[**-bHw**] \[**-j**&nbsp;*jail*] \[*proc&nbsp;...*]
 
 # DESCRIPTION
 
@@ -23,8 +23,7 @@ The following options are available:
 
 **-b**
 
-> Check only for missing binaries, skipping the far more expensive check for stale
-> libraries.
+> Check only for missing binaries, skipping the far more expensive check for stale libraries.
 
 **-H**
 
@@ -38,7 +37,11 @@ The following options are available:
 
 > Filter output by specified jail name or ID.
 
+If any *proc* operands are specified, they are treated as process names, IDs, and group IDs to limit checks to.
+
 # EXAMPLES
+
+Check all processes visible by the user:
 
 	 # checkrestart
 	  PID   JID NAME         UPDATED COMMAND
@@ -48,6 +51,18 @@ The following options are available:
 	18115     1 memcached    Binary  /usr/local/bin/memcached
 
 This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached**, running in jail 1, is also out of date having left its arguments list as the full path to its original executable.
+
+Check only processes named weechat and tmux:
+
+	 # checkrestart weechat tmux
+
+Check only processes with PID 142 and 157:
+
+	 # checkrestart 142 157
+
+Check only processes in PGID 117:
+
+	 # checkrestart -- -117
 
 # SEE ALSO
 
@@ -59,7 +74,7 @@ A **checkrestart** command first appeared in the debian-extras package in Debian
 
 This implementation follows a similar idea, and is based on a prior version in the author's **pkg-cruft** Ruby script.
 
-A similar **checkrestart** command is also available as an OpenBSD port.
+An unrelated but similar **checkrestart** command is also available as an OpenBSD port.
 
 # AUTHORS
 

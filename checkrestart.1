@@ -9,7 +9,7 @@
 .Op Fl -libxo
 .Op Fl bHw
 .Op Fl j Ar jail
-.Op Ar pid ...
+.Op Ar proc ...
 .Sh DESCRIPTION
 The
 .Nm
@@ -49,7 +49,13 @@ Print the full width of the COMMAND column even if it will wrap in the terminal.
 .It Fl j Ar jail
 Filter output by specified jail name or ID.
 .El
+.Pp
+If any
+.Ar proc
+operands are specified, they are treated as process names, IDs, and group IDs to
+limit checks to.
 .Sh EXAMPLES
+Check all processes visible by the user:
 .Bd -literal -offset indent
  # checkrestart
   PID   JID NAME         UPDATED COMMAND
@@ -68,6 +74,21 @@ arguments list obscuring its location, and
 .Nm memcached ,
 running in jail 1, is also out of date having left its arguments list as the
 full path to its original executable.
+.Pp
+Check only processes named weechat and tmux:
+.Bd -literal -offset indent
+ # checkrestart weechat tmux
+.Ed
+.Pp
+Check only processes with PID 142 and 157:
+.Bd -literal -offset indent
+ # checkrestart 142 157
+.Ed
+.Pp
+Check only processes in PGID 117:
+.Bd -literal -offset indent
+ # checkrestart -- -117
+.Ed
 .Sh SEE ALSO
 .Xr procstat 1 ,
 .Xr libxo 3 ,
@@ -84,7 +105,7 @@ in the author's
 .Nm pkg-cruft
 Ruby script.
 .Pp
-A similar
+An unrelated but similar
 .Nm
 command is also available as an
 .Ox
