@@ -33,6 +33,7 @@ static void
 usage(void)
 {
 	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [proc ...]\n", getprogname());
+	xo_finish();
 	exit(EXIT_FAILURE);
 }
 
