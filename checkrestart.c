@@ -101,7 +101,7 @@ getargs(pid_t pid, char *args, size_t maxlen)
 static void
 needsrestart(const struct kinfo_proc *proc, const char *updated, const char *command)
 {
-	char fmtbuf[sizeof("{:command/%-4294967295.4294967295s}\n")];
+	char fmtbuf[sizeof("{:command/%.4294967295s}\n")];
 	int col, width;
 
 	if (needheader) {
@@ -120,7 +120,7 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 
 	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
 		width = MAX(termwidth - col, (int)sizeof("COMMAND") - 1);
-		snprintf(fmtbuf, sizeof(fmtbuf), "{:command/%%-%d.%ds}\n", width, width);
+		snprintf(fmtbuf, sizeof(fmtbuf), "{:command/%%.%ds}\n", width);
 		xo_emit(fmtbuf, command);
 	} else {
 		xo_emit("{:command/%s}\n", command);
