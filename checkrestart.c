@@ -21,7 +21,7 @@
 #include <sysexits.h>
 #include <unistd.h>
 
-#define CHECKRESTART_XO_VERSION   "1"
+#define CHECKRESTART_XO_VERSION   "2"
 #define CHECKRESTART_XO_CONTAINER "checkrestart"
 #define CHECKRESTART_XO_PROCESS   "process"
 
