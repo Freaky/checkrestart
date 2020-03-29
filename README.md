@@ -31,7 +31,7 @@ The following options are available:
 
 **-w**
 
-> Print the full width of the COMMAND column even if it will wrap in the terminal.
+> Print the full width of the ARGUMENTS column even if it will wrap in the terminal.
 
 **-j** *jail*
 
