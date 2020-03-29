@@ -48,11 +48,11 @@ If any *proc* operands are specified, they are treated as process names, IDs, an
 Check all processes visible by the user:
 
 	 # checkrestart
-	  PID   JID USER         NAME         UPDATED COMMAND
-	44960     0 freaky       weechat      Library /usr/local/bin/weechat
-	81345     0 freaky       tmux         Binary  tmux: server (/tmp/tmux-1001/default)
-	80307     0 freaky       tmux         Binary  tmux: client (/tmp/tmux-1001/default)
-	18115     1 nobody       memcached    Binary  /usr/local/bin/memcached
+	  PID   JID USER         COMMAND      WHY ARGUMENTS
+	44960     0 freaky       weechat      lib /usr/local/bin/weechat
+	81345     0 freaky       tmux         bin tmux: server (/tmp/tmux-1001/default)
+	80307     0 freaky       tmux         bin tmux: client (/tmp/tmux-1001/default)
+	18115     1 nobody       memcached    bin /usr/local/bin/memcached
 
 This output indicates **weechat** is using an out of date library, a **tmux** client/server pair is using an out-of-date executable, having replaced its arguments list obscuring its location, and **memcached**, running in jail 1, is also out of date having left its arguments list as the full path to its original executable.
 

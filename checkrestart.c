@@ -25,6 +25,8 @@
 #define CHECKRESTART_XO_CONTAINER "checkrestart"
 #define CHECKRESTART_XO_PROCESS   "process"
 
+enum Reason { MissingExe, MissingLib };
+
 static int filter_jid = -1;
 static int termwidth = 0;
 static uid_t filter_uid = 0;
@@ -128,32 +130,41 @@ user_getuid(const char *username, uid_t *uid) {
 }
 
 static void
-needsrestart(const struct kinfo_proc *proc, const char *updated, const char *command)
+needsrestart(const struct kinfo_proc *proc, const enum Reason reason, const char *args)
 {
-	char fmtbuf[sizeof("{:command/%.4294967295s}\n")];
+	char fmtbuf[sizeof("{:arguments/%.4294967295s}\n")];
+	const char *why;
 	int col, width;
 
 	if (needheader) {
 		needheader = false;
 		xo_emit(
-		    "{T:/%5s} {T:/%5s} {T:/%-12.12s} {T:/%-12.12s} {T:/%-7s} {T:/%s}\n",
-		    "PID", "JID", "USER", "NAME", "UPDATED", "COMMAND"
+		    "{Tw:/%5s}{Tw:/%5s}{Tw:/%-12.12s}{Tw:/%-12.12s}{Tw:/%-3s}{T:/%s}\n",
+		    "PID", "JID", "USER", "COMMAND", "WHY", "ARGUMENTS"
 		);
 	}
 
 	xo_open_instance(CHECKRESTART_XO_PROCESS);
-	col  = xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);
-	col += xo_emit("{:jid/%5d/%d} ",       proc->ki_jid);
-	col += xo_emit("{:user/%-12.12s/%s} ", user_getname(proc->ki_uid));
-	col += xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm);
-	col += xo_emit("{:updated/%-7s/%s} ",  updated);
+	col  = xo_emit("{kw:pid/%5d/%d}",         proc->ki_pid);
+	col += xo_emit("{w:jid/%5d/%d}",          proc->ki_jid);
+	col += xo_emit("{e:uid/%d/%d}",           proc->ki_uid);
+	col += xo_emit("{w:user/%-12.12s/%s}",    user_getname(proc->ki_uid));
+	col += xo_emit("{w:command/%-12.12s/%s}", proc->ki_comm);
+
+	if (reason == MissingExe) {
+		why = "bin";
+	} else {
+		why = "lib";
+	}
+
+	col += xo_emit("{w:why/%-3s/%s}", why);
 
 	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
-		width = MAX(termwidth - col, (int)sizeof("COMMAND") - 1);
-		snprintf(fmtbuf, sizeof(fmtbuf), "{:command/%%.%ds}\n", width);
-		xo_emit(fmtbuf, command);
+		width = MAX(termwidth - col, (int)sizeof("ARGUMENTS") - 1);
+		snprintf(fmtbuf, sizeof(fmtbuf), "{:arguments/%%.%ds}\n", width);
+		xo_emit(fmtbuf, args);
 	} else {
-		xo_emit("{:command/%s}\n", command);
+		xo_emit("{:arguments/%s}\n", args);
 	}
 	xo_close_instance(CHECKRESTART_XO_PROCESS);
 }
@@ -191,7 +202,7 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 
 		// Binary path is just empty. Get its argv instead
 		(void)getargs(proc->ki_pid, args, sizeof(args));
-		needsrestart(proc, "Binary", args);
+		needsrestart(proc, MissingExe, args);
 	} else if (!binonly) {
 		vmaps = procstat_getvmmap(prstat, proc, &cnt);
 		if (vmaps == NULL) {
@@ -204,7 +215,7 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 			if (kve->kve_protection & KVME_PROT_EXEC && // executable mapping
 			    kve->kve_type == KVME_TYPE_VNODE &&     // backed by a vnode
 			    kve->kve_path[0] == '\0') {             // with no associated path
-				needsrestart(proc, "Library", pathname);
+				needsrestart(proc, MissingLib, pathname);
 				break;
 			}
 		}
