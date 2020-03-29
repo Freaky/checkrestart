@@ -208,7 +208,7 @@ main(int argc, char *argv[])
 			break;
 		case 'j':
 			if (parse_int(optarg, &jid)) {
-				if (jid <= 0) {
+				if (jid < 0) {
 					usage();
 				}
 			} else {
