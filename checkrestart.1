@@ -9,6 +9,7 @@
 .Op Fl -libxo
 .Op Fl bHw
 .Op Fl j Ar jail
+.Op Fl u Ar user
 .Op Ar proc ...
 .Sh DESCRIPTION
 The
@@ -48,6 +49,8 @@ Suppress the header.
 Print the full width of the COMMAND column even if it will wrap in the terminal.
 .It Fl j Ar jail
 Filter output by specified jail name or ID.
+.It Fl u Ar user
+Filter output by specified user name or ID.
 .El
 .Pp
 If any
@@ -58,11 +61,11 @@ limit checks to.
 Check all processes visible by the user:
 .Bd -literal -offset indent
  # checkrestart
-  PID   JID NAME         UPDATED COMMAND
-44960     0 weechat      Library /usr/local/bin/weechat
-81345     0 tmux         Binary  tmux: server (/tmp/tmux-1001/default)
-80307     0 tmux         Binary  tmux: client (/tmp/tmux-1001/default)
-18115     1 memcached    Binary  /usr/local/bin/memcached
+  PID   JID USER         NAME         UPDATED COMMAND
+44960     0 freaky       weechat      Library /usr/local/bin/weechat
+81345     0 freaky       tmux         Binary  tmux: server (/tmp/tmux-1001/default)
+80307     0 freaky       tmux         Binary  tmux: client (/tmp/tmux-1001/default)
+18115     1 nobody       memcached    Binary  /usr/local/bin/memcached
 .Ed
 .Pp
 This output indicates

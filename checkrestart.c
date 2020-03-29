@@ -12,6 +12,7 @@
 #include <libprocstat.h>
 #include <libxo/xo.h>
 #include <limits.h>
+#include <pwd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -24,15 +25,18 @@
 #define CHECKRESTART_XO_CONTAINER "checkrestart"
 #define CHECKRESTART_XO_PROCESS   "process"
 
-static int jid = -1;
+static int filter_jid = -1;
 static int termwidth = 0;
+static uid_t filter_uid = 0;
 static bool binonly = false;
+static bool jflag = false;
 static bool needheader = true;
+static bool uflag = false;
 
 static void
 usage(void)
 {
-	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [proc ...]\n", getprogname());
+	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [-u [user]] [proc ...]\n", getprogname());
 	xo_finish();
 	exit(EXIT_FAILURE);
 }
@@ -98,6 +102,31 @@ getargs(pid_t pid, char *args, size_t maxlen)
 	return (getprocstr(pid, KERN_PROC_ARGS, args, maxlen));
 }
 
+static char *
+user_getname(uid_t uid) {
+	static char uidstr[11] = "";
+	struct passwd *pw = getpwuid(uid);
+
+	if (pw != NULL) {
+		return (pw->pw_name);
+	} else {
+		snprintf(uidstr, sizeof(uidstr), "%d", (unsigned int)uid);
+		return (uidstr);
+	}
+}
+
+static bool
+user_getuid(const char *username, uid_t *uid) {
+	struct passwd *pw = getpwnam(username);
+
+	if (pw != NULL) {
+		*uid = pw->pw_uid;
+		return (true);
+	} else {
+		return (false);
+	}
+}
+
 static void
 needsrestart(const struct kinfo_proc *proc, const char *updated, const char *command)
 {
@@ -107,14 +136,15 @@ needsrestart(const struct kinfo_proc *proc, const char *updated, const char *com
 	if (needheader) {
 		needheader = false;
 		xo_emit(
-		    "{T:/%5s} {T:/%5s} {T:/%-12.12s} {T:/%-7s} {T:/%s}\n",
-		    "PID", "JID", "NAME", "UPDATED", "COMMAND"
+		    "{T:/%5s} {T:/%5s} {T:/%-12.12s} {T:/%-12.12s} {T:/%-7s} {T:/%s}\n",
+		    "PID", "JID", "USER", "NAME", "UPDATED", "COMMAND"
 		);
 	}
 
 	xo_open_instance(CHECKRESTART_XO_PROCESS);
 	col  = xo_emit("{k:pid/%5d/%d} ",      proc->ki_pid);
 	col += xo_emit("{:jid/%5d/%d} ",       proc->ki_jid);
+	col += xo_emit("{:user/%-12.12s/%s} ", user_getname(proc->ki_uid));
 	col += xo_emit("{:name/%-12.12s/%s} ", proc->ki_comm);
 	col += xo_emit("{:updated/%-7s/%s} ",  updated);
 
@@ -140,8 +170,11 @@ checkrestart(struct procstat *prstat, struct kinfo_proc *proc)
 		return;
 	}
 
-	// If -j is specified and value is a valid JID, skip non-matching JID
-	if (jid >= 0 && proc->ki_jid != jid) {
+	if (jflag && proc->ki_jid != filter_jid) {
+		return;
+	}
+
+	if (uflag && proc->ki_uid != filter_uid) {
 		return;
 	}
 
@@ -198,7 +231,7 @@ main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	}
 
-	while ((ch = getopt(argc, argv, "bHj:w")) != -1) {
+	while ((ch = getopt(argc, argv, "bHj:u:w")) != -1) {
 		switch (ch) {
 		case 'b':
 			binonly = true;
@@ -207,15 +240,22 @@ main(int argc, char *argv[])
 			needheader = false;
 			break;
 		case 'j':
-			if (parse_int(optarg, &jid)) {
-				if (jid < 0) {
+			jflag = true;
+			if (parse_int(optarg, &filter_jid)) {
+				if (filter_jid < 0) {
 					usage();
 				}
 			} else {
-				jid = jail_getid(optarg);
-				if (jid == -1) {
+				filter_jid = jail_getid(optarg);
+				if (filter_jid == -1) {
 					xo_errx(EXIT_FAILURE, "jail \"%s\" not found", optarg);
 				}
+			}
+			break;
+		case 'u':
+			uflag = true;
+			if (!parse_int(optarg, &filter_uid) && !user_getuid(optarg, &filter_uid)) {
+				xo_errx(EXIT_FAILURE, "user \"%s\" not found", optarg);
 			}
 			break;
 		case 'w':
