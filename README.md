@@ -49,7 +49,7 @@ Check all processes visible by the user:
 
 	 # checkrestart
 	  PID   JID USER         COMMAND      WHY ARGUMENTS
-	44960     0 freaky       weechat      lib /usr/local/bin/weechat
+	44960     0 freaky       weechat      .so /usr/local/bin/weechat
 	81345     0 freaky       tmux         bin tmux: server (/tmp/tmux-1001/default)
 	80307     0 freaky       tmux         bin tmux: client (/tmp/tmux-1001/default)
 	18115     1 nobody       memcached    bin /usr/local/bin/memcached

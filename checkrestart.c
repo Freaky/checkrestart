@@ -154,7 +154,7 @@ needsrestart(const struct kinfo_proc *proc, const enum Reason reason, const char
 	if (reason == MissingExe) {
 		why = "bin";
 	} else {
-		why = "lib";
+		why = ".so";
 	}
 
 	col += xo_emit("{w:why/%-3s/%s}", why);
