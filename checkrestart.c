@@ -257,7 +257,7 @@ main(int argc, char *argv[])
 			break;
 		case 'u':
 			uflag = true;
-			if (!parse_int(optarg, &filter_uid) && !user_getuid(optarg, &filter_uid)) {
+			if (!parse_int(optarg, (int *)&filter_uid) && !user_getuid(optarg, &filter_uid)) {
 				xo_errx(EXIT_FAILURE, "user \"%s\" not found", optarg);
 			}
 			break;
