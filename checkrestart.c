@@ -133,7 +133,6 @@ static void
 needsrestart(const struct kinfo_proc *proc, const enum Reason reason, const char *args)
 {
 	char fmtbuf[sizeof("{:arguments/%.4294967295s}\n")];
-	const char *why;
 	int col, width;
 
 	if (needheader) {
@@ -150,14 +149,7 @@ needsrestart(const struct kinfo_proc *proc, const enum Reason reason, const char
 	col += xo_emit("{e:uid/%d/%d}",           proc->ki_uid);
 	col += xo_emit("{w:user/%-12.12s/%s}",    user_getname(proc->ki_uid));
 	col += xo_emit("{w:command/%-12.12s/%s}", proc->ki_comm);
-
-	if (reason == MissingExe) {
-		why = "bin";
-	} else {
-		why = ".so";
-	}
-
-	col += xo_emit("{w:why/%-3s/%s}", why);
+	col += xo_emit("{w:why/%-3s/%s}",         reason == MissingExe ? "bin" : ".so");
 
 	if (termwidth && xo_get_style(NULL) == XO_STYLE_TEXT) {
 		width = MAX(termwidth - col, (int)sizeof("ARGUMENTS") - 1);
