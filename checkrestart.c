@@ -40,7 +40,7 @@ usage(void)
 {
 	xo_error("usage: %s [--libxo] [-bHw] [-j jail] [-u [user]] [proc ...]\n", getprogname());
 	xo_finish();
-	exit(EXIT_FAILURE);
+	exit(EX_USAGE);
 }
 
 static bool
@@ -225,13 +225,13 @@ main(int argc, char *argv[])
 	int ch, rc, filterc;
 	pid_t pid;
 
-	rc = EXIT_FAILURE;
+	rc = EX_TEMPFAIL; // most likely we just didn't find anything
 	termwidth = gettermwidth();
 
 	xo_set_flags(NULL, XOF_WARN | XOF_COLUMNS);
 	argc = xo_parse_args(argc, argv);
 	if (argc < 0) {
-		return (EXIT_FAILURE);
+		return (EX_USAGE);
 	}
 
 	while ((ch = getopt(argc, argv, "bHj:u:w")) != -1) {
@@ -251,14 +251,14 @@ main(int argc, char *argv[])
 			} else {
 				filter_jid = jail_getid(optarg);
 				if (filter_jid == -1) {
-					xo_errx(EXIT_FAILURE, "jail \"%s\" not found", optarg);
+					xo_errx(EX_NOHOST, "jail \"%s\" not found", optarg);
 				}
 			}
 			break;
 		case 'u':
 			uflag = true;
-			if (!parse_int(optarg, (int *)&filter_uid) && !user_getuid(optarg, &filter_uid)) {
-				xo_errx(EXIT_FAILURE, "user \"%s\" not found", optarg);
+			if (!parse_int(optarg, (int *)&filter_uid) && !user_getuid(optarg, &filter_uid)) {	
+				xo_errx(EX_NOUSER, "user \"%s\" not found", optarg);
 			}
 			break;
 		case 'w':
@@ -274,7 +274,7 @@ main(int argc, char *argv[])
 
 	prstat = procstat_open_sysctl();
 	if (prstat == NULL) {
-		xo_errx(EXIT_FAILURE, "procstat_open()");
+		xo_errx(EX_OSERR, "procstat_open()");
 	}
 
 	p = procstat_getprocs(prstat, KERN_PROC_PROC, 0, &cnt);
@@ -299,13 +299,13 @@ main(int argc, char *argv[])
 					    (pid < 0 && p[i].ki_pgid == abs(pid)) ||
 					    (pid == 0 && strcmp(argv[filterc], p[i].ki_comm) == 0)
 					) {
-						rc = EXIT_SUCCESS;
+						rc = EX_OK;
 						checkrestart(prstat, &p[i]);
 						break;
 					}
 				}
 			} else {
-				rc = EXIT_SUCCESS;
+				rc = EX_OK;
 				checkrestart(prstat, &p[i]);
 			}
 		}
