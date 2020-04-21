@@ -52,6 +52,15 @@ parse_int(const char *str, int *value)
 	return (*str != '\0' && *end == '\0');
 }
 
+static bool
+parse_uint(const char *str, unsigned int *value)
+{
+	char *end;
+
+	*value = strtoumax(str, &end, 10);
+	return (*str != '\0' && *end == '\0');
+}
+
 static int
 gettermwidth(void)
 {
@@ -257,7 +266,7 @@ main(int argc, char *argv[])
 			break;
 		case 'u':
 			uflag = true;
-			if (!parse_int(optarg, (int *)&filter_uid) && !user_getuid(optarg, &filter_uid)) {	
+			if (!parse_uint(optarg, &filter_uid) && !user_getuid(optarg, &filter_uid)) {	
 				xo_errx(EX_NOUSER, "user \"%s\" not found", optarg);
 			}
 			break;
