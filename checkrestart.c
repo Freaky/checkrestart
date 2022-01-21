@@ -43,34 +43,20 @@ usage(void)
 	exit(EX_USAGE);
 }
 
-static bool
-parse_int(const char *str, int *value)
-{
-	char *end;
-
-	*value = strtoimax(str, &end, 10);
-	return (*str != '\0' && *end == '\0');
-}
-
-static bool
-parse_uint(const char *str, unsigned int *value)
-{
-	char *end;
-
-	*value = strtoumax(str, &end, 10);
-	return (*str != '\0' && *end == '\0');
-}
-
 static int
 gettermwidth(void)
 {
 	struct winsize ws = { .ws_row = 0 };
+	const char *err;
 	char *colenv;
 	int cols;
 
 	colenv = getenv("COLUMNS");
-	if (colenv != NULL && parse_int(colenv, &cols) && cols > 0) {
-		return (cols);
+	if (colenv != NULL) {
+		cols = strtonum(colenv, 1, 512, &err);
+		if (err == NULL) {
+			return (cols);
+		}
 	}
 
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, (char *)&ws) != -1 ||
@@ -230,6 +216,7 @@ main(int argc, char *argv[])
 {
 	struct kinfo_proc *p;
 	struct procstat *prstat;
+	const char *err;
 	unsigned int cnt, i;
 	int ch, rc, filterc;
 	pid_t pid;
@@ -253,11 +240,8 @@ main(int argc, char *argv[])
 			break;
 		case 'j':
 			jflag = true;
-			if (parse_int(optarg, &filter_jid)) {
-				if (filter_jid < 0) {
-					usage();
-				}
-			} else {
+			filter_jid = strtonum(optarg, 0, INT_MAX, &err);
+			if (err != NULL) {
 				filter_jid = jail_getid(optarg);
 				if (filter_jid == -1) {
 					xo_errx(EX_NOHOST, "jail \"%s\" not found", optarg);
@@ -266,7 +250,8 @@ main(int argc, char *argv[])
 			break;
 		case 'u':
 			uflag = true;
-			if (!parse_uint(optarg, &filter_uid) && !user_getuid(optarg, &filter_uid)) {	
+			filter_uid = strtonum(optarg, 0, UID_MAX, &err);
+			if (err == NULL || !user_getuid(optarg, &filter_uid)) {
 				xo_errx(EX_NOUSER, "user \"%s\" not found", optarg);
 			}
 			break;
@@ -297,7 +282,8 @@ main(int argc, char *argv[])
 		for (i = 0; i < cnt; i++) {
 			if (argc) {
 				for (filterc = 0; filterc < argc; filterc++) {
-					if (!parse_int(argv[filterc], &pid)) {
+					pid = strtonum(argv[filterc], INT_MIN, INT_MAX, &err);
+					if (err != NULL) {
 						pid = 0;
 					} else if (pid == 0) {
 						usage();
