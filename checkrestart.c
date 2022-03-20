@@ -251,7 +251,7 @@ main(int argc, char *argv[])
 		case 'u':
 			uflag = true;
 			filter_uid = strtonum(optarg, 0, UID_MAX, &err);
-			if (err == NULL || !user_getuid(optarg, &filter_uid)) {
+			if (err != NULL && !user_getuid(optarg, &filter_uid)) {
 				xo_errx(EX_NOUSER, "user \"%s\" not found", optarg);
 			}
 			break;
